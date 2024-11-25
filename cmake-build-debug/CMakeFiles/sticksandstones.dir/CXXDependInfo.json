@@ -1,0 +1,18 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "GNU",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "/home/gabrys/CLionProjects/sticksandstones/cmake-build-debug",
+	"dir-cur-src" : "/home/gabrys/CLionProjects/sticksandstones",
+	"dir-top-bld" : "/home/gabrys/CLionProjects/sticksandstones/cmake-build-debug",
+	"dir-top-src" : "/home/gabrys/CLionProjects/sticksandstones",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "/home/gabrys/CLionProjects/sticksandstones/cmake-build-debug/CMakeFiles/sticksandstones.dir"
+}

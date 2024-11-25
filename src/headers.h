@@ -1,0 +1,18 @@
+//
+// Created by gabrys on 25.11.24.
+//
+
+#ifndef HEADERS_H
+#define HEADERS_H
+
+#include <iostream>
+#include <cassert>
+#include <vector>
+#include <typeinfo>
+
+#include "fmt/xchar.h"
+#include "SFML/Window/Event.hpp"
+#include "SFML/Window/Window.hpp"
+#include "SFML/Graphics/Texture.hpp"
+
+#endif //HEADERS_H

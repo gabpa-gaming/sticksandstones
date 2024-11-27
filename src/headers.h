@@ -9,6 +9,7 @@
 #include <cassert>
 #include <vector>
 #include <typeinfo>
+#include <type_traits>
 
 #include "fmt/xchar.h"
 #include "SFML/Window/Event.hpp"

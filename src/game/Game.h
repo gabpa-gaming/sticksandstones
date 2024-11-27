@@ -5,17 +5,21 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "entity/Entity.h"
 #include "entity/Entity2D.h"
 
-class Entity2D;
+class Game : public virtual Entity2D {
 
-class Game : Entity2D {
-
-    static Game *instance;
+    static Game* instance; //raw pointer shouldnt be a problem right???
 
     public:
-    static Game *getInstance();
-    Game();
+    static Game* getInstance();
+
+    auto updateAll() -> void;
+
+    auto end() -> void;
+
+    explicit Game(); //root game entity, is a parent to all entities
 };
 
 

@@ -4,16 +4,30 @@
 
 #include "Game.h"
 #include "entity/Entity.h"
+#include "entity/Entity2D.h"
 
 Game* Game::instance = nullptr;
 
-Game *Game::getInstance() {
+Game* Game::getInstance() {
     if (instance == nullptr) {
         instance = new Game();
     }
     return Game::instance;
 }
 
-Game::Game() : Entity2D(nullptr,0,0) {
+auto Game::updateAll() -> void {
+    ////todo
+}
+
+auto Game::end() -> void {
+    for (auto child : children) {
+        child -> setParent(nullptr);
+    }
+    //bye
+    delete instance;
+} //make sure it doesnt fuck up in some way //todo
+
+
+Game::Game() : Entity2D(nullptr) {
 
 }

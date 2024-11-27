@@ -8,22 +8,19 @@
 
 #include "Entity.h"
 
-class Entity;
 
-class Entity2D : Entity{
+class Entity2D : public virtual Entity{
 
     double x,y;
     double localX,localY;
 
-    explicit Entity2D();
-
     public:
-    auto getGlobalPos();
-    auto getLocalPos();
+    auto getGlobalPos() const -> sf::Vector2<double>;
+    auto getLocalPos() const-> sf::Vector2<double>;
 
-    auto setGlobalPos(double x, double y);
-    auto setLocalPos(double x, double y);
-    auto dislocate(double x, double y);
+    auto setGlobalPos(double x, double y) -> void;
+    auto setLocalPos(double x, double y) -> void;
+    auto dislocate(double x, double y) -> void;
 
 
     explicit Entity2D(Entity* parent, double localX, double localY);

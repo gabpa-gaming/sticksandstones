@@ -1,5 +1,6 @@
 
 #include "headers.h"
+#include "game/Game.h"
 
 
 auto initGameWindow()-> sf::Window*;
@@ -39,4 +40,11 @@ auto initGameWindow() -> sf::Window* {
     window->setIcon(16,16,image.getPixelsPtr());
 
     return window;
+}
+
+auto initGame(sf::Window* window){
+
+    Game* game = new Game();
+
+    return game;
 }

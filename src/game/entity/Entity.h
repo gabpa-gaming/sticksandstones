@@ -7,21 +7,29 @@
 
 #include "../../headers.h"
 
-class Entity {
+class Entity { //oh, the misery everybody wants to be my entity
 
     int id = 0;
-    Entity *parent = nullptr;
+protected:
     std::vector<Entity *> children;
-
+    Entity *parent = nullptr;
 public:
     auto isChildOf(const Entity *parent) const -> bool;
-    const auto isParentOf(Entity& child);
-    auto addChild(Entity &child);
-    auto removeChild(int child_iter);
+    auto isParentOf(Entity* child) const -> bool;
+    auto addChild(Entity& child) -> void;
+    auto removeChild(int child_iter) -> void;
     auto setParent(Entity *parent) -> void;
 
-    Entity *getChild(int child_iter) const;
+    [[nodiscard]]
+    auto getHierarchy() const -> std::string;
+    [[nodiscard]]
+    virtual auto getName() const -> std::string;
+    [[nodiscard]]
+    auto getChild(int child_iter) const -> Entity*;
     explicit Entity(Entity *parent);
+    Entity()=default; //why is this needed?????? Bro cant even be private 😭😭 or fails build in Game.cpp
+    virtual ~Entity();
+
 };
 
 

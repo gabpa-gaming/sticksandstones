@@ -10,10 +10,14 @@
 #include <vector>
 #include <typeinfo>
 #include <type_traits>
+#include <sstream>
+#include <memory>
 
 #include "fmt/xchar.h"
 #include "SFML/Window/Event.hpp"
 #include "SFML/Window/Window.hpp"
 #include "SFML/Graphics/Texture.hpp"
+
+#include "helpers.h"
 
 #endif //HEADERS_H

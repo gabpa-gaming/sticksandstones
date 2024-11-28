@@ -15,16 +15,17 @@ class Entity2D : public virtual Entity{
     double localX,localY;
 
     public:
+
     auto getGlobalPos() const -> sf::Vector2<double>;
     auto getLocalPos() const-> sf::Vector2<double>;
 
     auto setGlobalPos(double x, double y) -> void;
     auto setLocalPos(double x, double y) -> void;
     auto dislocate(double x, double y) -> void;
+    auto getName() const -> std::string override;
 
-
-    explicit Entity2D(Entity* parent, double localX, double localY);
-    explicit Entity2D(Entity* parent);
+    auto create(Entity *parent) -> Entity2D * override;
+    auto virtual create(Entity* parent, double localX, double localY) -> Entity2D*;
 };
 
 

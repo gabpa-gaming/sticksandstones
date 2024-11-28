@@ -13,7 +13,9 @@ class Entity { //oh, the misery everybody wants to be my entity
 protected:
     std::vector<Entity *> children;
     Entity *parent = nullptr;
+
 public:
+    auto getId() const -> int;
     auto isChildOf(const Entity *parent) const -> bool;
     auto isParentOf(Entity* child) const -> bool;
     auto addChild(Entity& child) -> void;
@@ -26,8 +28,12 @@ public:
     virtual auto getName() const -> std::string;
     [[nodiscard]]
     auto getChild(int child_iter) const -> Entity*;
-    explicit Entity(Entity *parent);
-    Entity()=default; //why is this needed?????? Bro cant even be private 😭😭 or fails build in Game.cpp
+
+
+    auto virtual create(Entity *parent) -> Entity*;
+
+    virtual auto IS_ROOT_FLAG() -> bool;
+
     virtual ~Entity();
 
 };

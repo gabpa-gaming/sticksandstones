@@ -11,6 +11,7 @@ Game* Game::instance = nullptr;
 Game* Game::getInstance() {
     if (instance == nullptr) {
         instance = new Game();
+        instance -> create();
     }
     return Game::instance;
 }
@@ -27,7 +28,16 @@ auto Game::end() -> void {
     delete instance;
 } //make sure it doesnt fuck up in some way //todo
 
-
-Game::Game() : Entity2D(nullptr) {
-
+std::string Game::getName() const {
+    return fmt::format("RootGameEntity, Id:{}, Pos: {},{}",getId(),getGlobalPos().x,getGlobalPos().y);
 }
+
+bool Game::IS_ROOT_FLAG() {
+    return true;
+}
+
+auto Game::create() -> Game * {
+    Entity2D::create(nullptr);
+    return this;
+}
+

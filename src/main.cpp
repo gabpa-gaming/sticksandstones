@@ -5,7 +5,7 @@
 
 auto initGameWindow()-> sf::Window*;
 
-auto initGame();
+auto initGame(sf::Window* window) -> Game*;
 
 auto main() -> int {
     fmt::println("Running the game...");
@@ -13,6 +13,8 @@ auto main() -> int {
     const auto window = initGameWindow();
 
     fmt::println("Window created");
+
+    initGame(window);
 
     while (window -> isOpen())
     {
@@ -42,9 +44,24 @@ auto initGameWindow() -> sf::Window* {
     return window;
 }
 
-auto initGame(sf::Window* window){
+auto initGame(sf::Window* window) -> Game*{
 
-    Game* game = new Game();
+    Game* game = Game::getInstance();
+
+    auto e1 = new Entity2D(); e1 -> create(game);
+    auto e2 = new Entity2D(); e2 -> create(game);
+    auto e3 = new Entity2D(); e3 -> create(game);
+    auto e4 = new Entity2D(); e4 -> create(game);
+    auto e5 = new Entity2D(); e5 -> create(e3, 1, 0);
+    auto e6 = new Entity2D(); e6 -> create(e2, 2 , 5);
+    auto e7 = new Entity2D(); e7 -> create(e3, 3, 4);
+    auto e8 = new Entity2D(); e8 -> create(e5, 1 , 1);
+    fmt::print(game->getHierarchy());
+
+    e5->dislocate(2,3);
+    fmt::print(game->getHierarchy());
+    e5->dislocate(-2,-3);
+    fmt::print(game->getHierarchy());
 
     return game;
 }

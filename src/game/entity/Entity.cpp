@@ -4,6 +4,12 @@
 #include "Entity.h"
 #include "../Game.h"
 
+auto Entity::IS_ROOT_FLAG() -> bool {
+    return false;
+}
+auto Entity::getId() const -> int {
+    return id;
+}
 
 auto Entity::isChildOf(const Entity* parent) const -> bool {
     if(parent == nullptr) {
@@ -21,7 +27,7 @@ auto Entity::isChildOf(const Entity* parent) const -> bool {
 }
 
 auto Entity::isParentOf(Entity* child) const -> bool {
-    return child->parent == this; //parents can be from adoption
+    return child->parent == this;
 }
 
 auto Entity::removeChild(const int child_iter) -> void {
@@ -29,19 +35,22 @@ auto Entity::removeChild(const int child_iter) -> void {
     children.erase(children.begin() + child_iter);
 }
 
-auto Entity::setParent(Entity *parent) -> void{
-    if (parent == nullptr && typeid(*this) != typeid(Game::getInstance())) {
+auto Entity::setParent(Entity *parent) -> void { //in this codebase adoption is a simple process
+    if(IS_ROOT_FLAG() && parent != nullptr) {
+        throw std::logic_error("Cannot set a parent to root entity.");
+    }
+    if (parent == nullptr && !IS_ROOT_FLAG()) {
         delete this;
         return;
     }
     if(this -> parent == parent) {
         return;
     }
-    if(parent != this) {
+    if(parent == this) {
         throw std::logic_error("An entity cannot be its own parent.");
     }
-    if(typeid(*this) == typeid(Game::getInstance())) {
-        throw std::logic_error("Cannot set a parent to root entity.");
+    if(parent == nullptr) { //only case for root
+        return;
     }
     if(!isChildOf(parent)) {
         parent -> children.push_back(this);
@@ -50,18 +59,17 @@ auto Entity::setParent(Entity *parent) -> void{
 }
 
 auto Entity::getHierarchy() const -> std::string {
-    std::string out = getName() + "\n";
+    std::string out = "\n";
     for(auto it = children.begin(); it != children.end(); it++) {
         std::string c = (it == children.end() - 1) ? "╚" : "╠";
-        out += '\t';
         out += c;
-        out += ((*it) -> getHierarchy()) + "\n";
+        out += ((*it) -> getHierarchy());
     }
-    return out;
+    return getName() + tabAllLines(out);
 }
 
 auto Entity::getName() const -> std::string {
-    return "Entity, Id:" + id;
+    return fmt::format("Entity, Id:{}", id) ;
 }
 
 auto Entity::addChild(Entity& child) -> void {
@@ -76,12 +84,14 @@ auto Entity::getChild(int child_iter) const -> Entity * {
     return children[child_iter];
 }
 
-
-Entity::Entity(Entity* parent) { //this is how kids are born
+auto Entity::create(Entity *parent) -> Entity * { //this is how kids are born
     static int idCount = 0;
-    id = idCount++;
-    setParent(parent);
+    this -> id = idCount++;
+    this -> setParent(parent);
+    return this;
 }
+
+
 
 Entity::~Entity() {
     for (auto child : children ) {

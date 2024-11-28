@@ -19,7 +19,11 @@ class Game : public virtual Entity2D {
 
     auto end() -> void;
 
-    explicit Game(); //root game entity, is a parent to all entities
+    auto getName() const -> std::string override;
+
+    auto IS_ROOT_FLAG() -> bool override;
+
+    auto create() -> Game*;//root game entity, is a parent to all entities
 };
 
 

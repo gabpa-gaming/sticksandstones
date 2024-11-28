@@ -3,7 +3,9 @@
 //
 
 #include "Entity2D.h"
+
 #include "../../headers.h"
+
 auto Entity2D::getGlobalPos() const -> sf::Vector2<double> {
     return {x,y};
 }
@@ -22,8 +24,12 @@ auto Entity2D::setGlobalPos(double x, double y) -> void {
         return;
     }
     auto parent_pos = p -> getGlobalPos();
-    this -> localX = parent_pos.x - x;
-    this -> localY = parent_pos.y - y;
+    this -> localX = x - parent_pos.x;
+    this -> localY = y - parent_pos.y;
+    for (auto child : children) {
+        auto c = dynamic_cast<Entity2D*>(child);
+        c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //should work
+    }
 }
 
 auto Entity2D::setLocalPos(const double x, const double y) -> void {
@@ -33,23 +39,38 @@ auto Entity2D::setLocalPos(const double x, const double y) -> void {
     if(p == nullptr) {
         this -> x = localX;
         this -> y = localY;
-        return;
     }
-    auto parent_pos = p -> getGlobalPos();
-    this -> x = parent_pos.x - localX;
-    this -> y = parent_pos.y - localY;
+    else {
+        auto parent_pos = p -> getGlobalPos();
+        this -> x = parent_pos.x + localX;
+        this -> y = parent_pos.y + localY;
+    }
+
+    for (auto child : children) {
+        auto c = dynamic_cast<Entity2D*>(child);
+        c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //reset local pos to itself so it properly changes
+    }                                                               //its global pos and updates children as well
 }
 
 auto Entity2D::dislocate(const double x, const double y) -> void {
     setGlobalPos(this->x + x, this->y + y);
 }
 
-Entity2D::Entity2D(Entity *parent, const double localX, const double localY): Entity(parent) {
-    setParent(parent);
-    setLocalPos(localX, localY);
+auto Entity2D::getName() const -> std::string {
+    return fmt::format("Entity2D, Id({}), At({},{}), Local({},{})",
+        getId(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
 }
 
-Entity2D::Entity2D(Entity *parent) : Entity(parent) {
-    setParent(parent);
-    setLocalPos(0,0);
+auto Entity2D::create(Entity *parent)-> Entity2D* {
+    Entity::create(parent);
+    this -> setLocalPos(0,0);
+    return this;
 }
+
+auto Entity2D::create(Entity *parent, double localX, double localY) -> Entity2D * {
+    Entity::create(parent);
+    this -> setParent(parent);
+    this -> setLocalPos(localX, localY);
+    return this;
+}
+

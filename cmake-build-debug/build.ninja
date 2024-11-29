@@ -89,6 +89,14 @@ build CMakeFiles/main.dir/src/helpers.cpp.o: CXX_COMPILER__main_unscanned_Debug 
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
+build CMakeFiles/main.dir/src/game/entity/SpriteEntity.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/gabrys/CLionProjects/sticksandstones/src/game/entity/SpriteEntity.cpp || cmake_object_order_depends_target_main
+  DEFINES = -DSFML_STATIC
+  DEP_FILE = CMakeFiles/main.dir/src/game/entity/SpriteEntity.cpp.o.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -I/home/gabrys/CLionProjects/sticksandstones/cmake-build-debug/_deps/fmt-src/include -isystem /home/gabrys/CLionProjects/sticksandstones/cmake-build-debug/_deps/sfml-src/include
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src/game/entity
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target main
@@ -97,7 +105,7 @@ build CMakeFiles/main.dir/src/helpers.cpp.o: CXX_COMPILER__main_unscanned_Debug 
 #############################################
 # Link the executable bin/main
 
-build bin/main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/src/main.cpp.o CMakeFiles/main.dir/src/game/entity/Entity.cpp.o CMakeFiles/main.dir/src/game/entity/Entity2D.cpp.o CMakeFiles/main.dir/src/game/Game.cpp.o CMakeFiles/main.dir/src/helpers.cpp.o | _deps/sfml-build/lib/libsfml-graphics-s-d.a _deps/fmt-build/libfmtd.a _deps/sfml-build/lib/libsfml-window-s-d.a /usr/lib/libX11.so /usr/lib/libXrandr.so /usr/lib/libXcursor.so _deps/sfml-build/lib/libsfml-system-s-d.a /usr/lib/libGL.so /usr/lib/libudev.so /usr/lib/libfreetype.so || _deps/fmt-build/libfmtd.a _deps/sfml-build/lib/libsfml-graphics-s-d.a _deps/sfml-build/lib/libsfml-system-s-d.a _deps/sfml-build/lib/libsfml-window-s-d.a
+build bin/main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/src/main.cpp.o CMakeFiles/main.dir/src/game/entity/Entity.cpp.o CMakeFiles/main.dir/src/game/entity/Entity2D.cpp.o CMakeFiles/main.dir/src/game/Game.cpp.o CMakeFiles/main.dir/src/helpers.cpp.o CMakeFiles/main.dir/src/game/entity/SpriteEntity.cpp.o | _deps/sfml-build/lib/libsfml-graphics-s-d.a _deps/fmt-build/libfmtd.a _deps/sfml-build/lib/libsfml-window-s-d.a /usr/lib/libX11.so /usr/lib/libXrandr.so /usr/lib/libXcursor.so _deps/sfml-build/lib/libsfml-system-s-d.a /usr/lib/libGL.so /usr/lib/libudev.so /usr/lib/libfreetype.so || _deps/fmt-build/libfmtd.a _deps/sfml-build/lib/libsfml-graphics-s-d.a _deps/sfml-build/lib/libsfml-system-s-d.a _deps/sfml-build/lib/libsfml-window-s-d.a
   FLAGS = -g
   LINK_LIBRARIES = _deps/sfml-build/lib/libsfml-graphics-s-d.a  _deps/fmt-build/libfmtd.a  _deps/sfml-build/lib/libsfml-window-s-d.a  /usr/lib/libX11.so  /usr/lib/libXrandr.so  /usr/lib/libXcursor.so  _deps/sfml-build/lib/libsfml-system-s-d.a  -lpthread  -lrt  /usr/lib/libGL.so  /usr/lib/libudev.so  -ldl  /usr/lib/libfreetype.so
   OBJECT_DIR = CMakeFiles/main.dir

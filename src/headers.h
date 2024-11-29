@@ -14,9 +14,7 @@
 #include <memory>
 
 #include "fmt/xchar.h"
-#include "SFML/Window/Event.hpp"
-#include "SFML/Window/Window.hpp"
-#include "SFML/Graphics/Texture.hpp"
+#include "SFML/Graphics.hpp"
 
 #include "helpers.h"
 

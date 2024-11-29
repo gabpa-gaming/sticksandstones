@@ -30,6 +30,8 @@ add_executable(main src/main.cpp
         src/game/Game.h
         src/helpers.cpp
         src/helpers.h
+        src/game/entity/SpriteEntity.cpp
+        src/game/entity/SpriteEntity.h
 )
 target_link_libraries(main PRIVATE sfml-graphics fmt)
 target_compile_features(main PRIVATE cxx_std_17)

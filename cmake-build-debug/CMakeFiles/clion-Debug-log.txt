@@ -4,6 +4,6 @@
 --    include: /usr/include
 -- {fmt} version: 11.0.2
 -- Build type: Debug
--- Configuring done (0.9s)
+-- Configuring done (1.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/gabrys/CLionProjects/sticksandstones/cmake-build-debug

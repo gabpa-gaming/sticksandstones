@@ -10,10 +10,10 @@
 
 class Game : public virtual Entity2D {
 
-    static Game* instance; //raw pointer shouldnt be a problem right???
+    static std::shared_ptr<Game> instance;
 
     public:
-    static Game* getInstance();
+    static auto getInstance() -> Game*;
 
     auto updateAll() -> void;
 

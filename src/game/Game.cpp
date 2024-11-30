@@ -6,27 +6,19 @@
 #include "entity/Entity.h"
 #include "entity/Entity2D.h"
 
-Game* Game::instance = nullptr;
+std::shared_ptr<Game> Game::instance;
 
-Game* Game::getInstance() {
-    if (instance == nullptr) {
-        instance = new Game();
+auto Game::getInstance() -> Game* {
+    if (!instance) {
+        instance = std::make_shared<Game>();
         instance -> create();
     }
-    return Game::instance;
+    return instance.get();
 }
 
 auto Game::updateAll() -> void {
     ////todo
 }
-
-auto Game::end() -> void {
-    for (auto child : children) {
-        child -> setParent(nullptr);
-    }
-    //bye
-    delete instance;
-} //make sure it doesnt fuck up in some way //todo
 
 std::string Game::getName() const {
     return fmt::format("RootGameEntity, Id:{}, Pos: {},{}",getId(),getGlobalPos().x,getGlobalPos().y);

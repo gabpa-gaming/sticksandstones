@@ -26,8 +26,8 @@ auto Entity2D::setGlobalPos(double x, double y) -> void {
     auto parent_pos = p -> getGlobalPos();
     this -> localX = x - parent_pos.x;
     this -> localY = y - parent_pos.y;
-    for (auto child : children) {
-        auto c = dynamic_cast<Entity2D*>(child);
+    for (auto &child : children) {
+        auto c = dynamic_cast<Entity2D*>(child.get());
         c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //should work
     }
 }
@@ -46,8 +46,8 @@ auto Entity2D::setLocalPos(const double x, const double y) -> void {
         this -> y = parent_pos.y + localY;
     }
 
-    for (auto child : children) {
-        auto c = dynamic_cast<Entity2D*>(child);
+    for (int i =  0; i < children.size(); i++) {
+        auto c = dynamic_cast<Entity2D*>(children[i].get());
         c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //reset local pos to itself so it properly changes
     }                                                               //its global pos and updates children as well
 }

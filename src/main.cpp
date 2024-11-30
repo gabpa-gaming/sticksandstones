@@ -62,14 +62,14 @@ auto initGame(sf::Window* window) -> Game*{
 
     Game* game = Game::getInstance();
 
-    auto e1 = new Entity2D(); e1 -> create(game);
-    auto e2 = new Entity2D(); e2 -> create(game);
-    auto e3 = new Entity2D(); e3 -> create(game);
-    auto e4 = new Entity2D(); e4 -> create(game);
-    auto e5 = new Entity2D(); e5 -> create(e3, 1, 0);
-    auto e6 = new Entity2D(); e6 -> create(e2, 2 , 5);
-    auto e7 = new Entity2D(); e7 -> create(e3, 3, 4);
-    auto e8 = new Entity2D(); e8 -> create(e5, 1 , 1);
+    auto e1 = std::make_shared<Entity2D>(); e1 -> create(game);
+    auto e2 = std::make_shared<Entity2D>(); e2 -> create(game);
+    auto e3 = std::make_shared<Entity2D>(); e3 -> create(game);
+    auto e4 = std::make_shared<Entity2D>(); e4 -> create(game);
+    auto e5 = std::make_shared<Entity2D>(); e5 -> create(e3.get(), 1, 0);
+    auto e6 = std::make_shared<Entity2D>(); e6 -> create(e2.get(), 2 , 5);
+    auto e7 = std::make_shared<Entity2D>(); e7 -> create(e3.get(), 3, 4);
+    auto e8 = std::make_shared<Entity2D>(); e8 -> create(e5.get(), 1 , 1);
     e5->dislocate(2,3);
 
 

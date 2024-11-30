@@ -12,27 +12,11 @@ auto Entity::getId() const -> int {
 }
 
 auto Entity::isChildOf(const Entity* parent) const -> bool {
-    if(parent == nullptr) {
-        return false;
-    }
-    int i =0;
-    Entity* child;
-    do {
-        child = parent -> getChild(i++);
-        if(child == this) {
-            return true;
-        }
-    }while(child != nullptr);
-    return false;
+    return this -> parent == parent;
 }
 
-auto Entity::isParentOf(Entity* child) const -> bool {
+auto Entity::isParentOf(const Entity* child) const -> bool {
     return child->parent == this;
-}
-
-auto Entity::removeChild(const int child_iter) -> void {
-    children[child_iter] -> setParent(Game::getInstance());
-    children.erase(children.begin() + child_iter);
 }
 
 auto Entity::setParent(Entity *parent) -> void { //in this codebase adoption is a simple process
@@ -40,7 +24,11 @@ auto Entity::setParent(Entity *parent) -> void { //in this codebase adoption is 
         throw std::logic_error("Cannot set a parent to root entity.");
     }
     if (parent == nullptr && !IS_ROOT_FLAG()) {
-        delete this;
+        int iter = getChildIter();
+        if(iter != -1) {
+            this->parent->children.erase(this -> children.begin() + iter);
+        }
+        this->parent = nullptr;
         return;
     }
     if(this -> parent == parent) {
@@ -52,10 +40,29 @@ auto Entity::setParent(Entity *parent) -> void { //in this codebase adoption is 
     if(parent == nullptr) { //only case for root
         return;
     }
+    if(this -> parent == nullptr) {
+        parent -> children.push_back(std::make_shared<Entity>(*this));
+        this -> parent = parent;
+        return;
+    }
     if(!isChildOf(parent)) {
-        parent -> children.push_back(this);
+        int iter = getChildIter();
+        auto const ref = std::move(parent->children[iter]);
+        parent -> children.push_back(std::make_shared<Entity>(*ref));
+        parent -> children.erase(children.begin() + iter);
         this -> parent = parent;
     }
+}
+
+auto Entity::getSiblings() const -> std::vector<Entity *> {
+    std::vector<Entity *> siblings;
+    if(parent == nullptr) {
+        throw std::logic_error("Root cant have siblings.");
+    }
+    for(auto it = parent -> children.begin(); it != parent -> children.end(); it++) {
+        siblings.push_back(it->get());
+    }
+    return siblings;
 }
 
 auto Entity::getHierarchy() const -> std::string {
@@ -73,15 +80,26 @@ auto Entity::getName() const -> std::string {
 }
 
 auto Entity::addChild(Entity& child) -> void {
-    children.push_back(&child);
-    child.parent = this;
+    child.setParent(this);
 }
 
 auto Entity::getChild(int child_iter) const -> Entity * {
     if(child_iter >= children.size()) {
         return nullptr;
     }
-    return children[child_iter];
+    return children[child_iter].get();
+}
+
+auto Entity::getChildIter() const -> int {
+    if(parent == nullptr){
+        return -1;
+    }
+    for (int i = 0; i < parent -> children.size(); i++) {
+        if(parent -> children[i].get() == this) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 auto Entity::create(Entity *parent) -> Entity * { //this is how kids are born
@@ -89,12 +107,4 @@ auto Entity::create(Entity *parent) -> Entity * { //this is how kids are born
     this -> id = idCount++;
     this -> setParent(parent);
     return this;
-}
-
-
-
-Entity::~Entity() {
-    for (auto child : children ) {
-        child->setParent(nullptr);
-    }
 }

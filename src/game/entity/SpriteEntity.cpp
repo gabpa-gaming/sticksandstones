@@ -34,6 +34,8 @@ auto SpriteEntity::create(Entity *parent, double localX, double localY) -> Sprit
 auto SpriteEntity::create(Entity *parent, double localX, double localY, sf::Texture* txt) -> SpriteEntity * {
     auto ent = Entity2D::create(parent, localX, localY);
 
+    setScale(3.25,3.25);
+
     texture = txt;
     if(txt)
         setTexture(*txt);

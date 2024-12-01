@@ -6,15 +6,15 @@
 
 #include "../../headers.h"
 
-auto Entity2D::getGlobalPos() const -> sf::Vector2<double> {
+auto Entity2D::getGlobalPos() const -> sf::Vector2<float> {
     return {x,y};
 }
 
-auto Entity2D::getLocalPos() const -> sf::Vector2<double> {
+auto Entity2D::getLocalPos() const -> sf::Vector2<float> {
     return {localX,localY};
 }
 
-auto Entity2D::setGlobalPos(double x, double y) -> void {
+auto Entity2D::setGlobalPos(float x, float y) -> void {
     this -> x = x;
     this -> y = y;
     auto p = dynamic_cast<Entity2D*>(this->parent);
@@ -32,7 +32,7 @@ auto Entity2D::setGlobalPos(double x, double y) -> void {
     }
 }
 
-auto Entity2D::setLocalPos(const double x, const double y) -> void {
+auto Entity2D::setLocalPos(const float x, const float y) -> void {
     localX = x;
     localY = y;
     auto p = dynamic_cast<Entity2D*>(this->parent);
@@ -52,7 +52,7 @@ auto Entity2D::setLocalPos(const double x, const double y) -> void {
     }                                                               //its global pos and updates children as well
 }
 
-auto Entity2D::dislocate(const double x, const double y) -> void {
+auto Entity2D::dislocate(const float x, const float y) -> void {
     setGlobalPos(this->x + x, this->y + y);
 }
 
@@ -61,16 +61,13 @@ auto Entity2D::getName() const -> std::string {
         getId(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
 }
 
-auto Entity2D::create(Entity *parent)-> Entity2D* {
-    Entity::create(parent);
-    this -> setLocalPos(0,0);
-    return this;
-}
+auto Entity2D::create(std::unique_ptr<Entity>& parent)-> std::unique_ptr<Entity>& override : create(parent, 0,0);
 
-auto Entity2D::create(Entity *parent, double localX, double localY) -> Entity2D * {
-    Entity::create(parent);
-    this -> setParent(parent);
-    this -> setLocalPos(localX, localY);
-    return this;
+auto Entity2D::create(std::unique_ptr<Entity>& parent, float localX, float localY) -> std::unique_ptr<Entity>& {
+    auto base = &Entity::create(parent); //Evil pointer to poiner
+    auto p = dynamic_cast<Entity2D*>(base -> get());
+    p -> get() -> x = localX; p -> get() -> y = localY;
+    p -> get() -> localX = localX; p -> get() -> localY = localY;
+    return *base;
 }
 

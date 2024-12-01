@@ -11,24 +11,26 @@ class Entity { //oh, the misery everybody wants to be my entity
 
     int id = 0;
 protected:
-    std::vector<std::shared_ptr<Entity>> children;
-    Entity *parent = nullptr;
+    std::vector<std::unique_ptr<Entity>> children;
+    //std::weak_ptr<Entity> parent;
 
 public:
     [[nodiscard]] auto getId() const -> int;
-    auto isChildOf(const Entity *parent) const -> bool;
-    auto isParentOf(const Entity* child) const -> bool;
-    auto addChild(Entity& child) -> void;
-    auto setParent(Entity *parent) -> void;
-    auto getSiblings() const -> std::vector<Entity*>;
+    //auto isChildOf(std::unique_ptr<Entity>& parent) const -> bool;
+    auto isParentOf(const std::unique_ptr<Entity> &child) const -> bool;
+    auto addChild(std::unique_ptr<Entity>& child) -> void;
+    //auto setParent(std::unique_ptr<Entity>& parent) -> void;
+    //auto getSiblings() const -> std::vector<std::shared_ptr<Entity>>&;
     [[nodiscard]] auto getHierarchy() const -> std::string;
     [[nodiscard]] virtual auto getName() const -> std::string;
-    [[nodiscard]] auto getChild(int child_iter) const -> Entity*;
+    [[nodiscard]] auto getChild(int child_iter) -> std::unique_ptr<Entity>&;
     [[nodiscard]] auto getChildIter() const -> int;
 
-    auto virtual create(Entity *parent) -> Entity*;
+    auto virtual create(std::unique_ptr<Entity> &parent) -> std::unique_ptr<Entity>&;
 
     virtual auto IS_ROOT_FLAG() -> bool;
+
+    Entity();
 
     virtual ~Entity() = default;
 

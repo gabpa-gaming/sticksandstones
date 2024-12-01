@@ -8,12 +8,16 @@
 
 std::shared_ptr<Game> Game::instance;
 
-auto Game::getInstance() -> Game* {
-    if (!instance) {
-        instance = std::make_shared<Game>();
-        instance -> create();
-    }
-    return instance.get();
+auto Game::getInstance() -> std::shared_ptr<Game> {
+    if(instance)
+        return instance;
+    resetInstance();
+    return instance;
+}
+
+auto Game::resetInstance() -> void{
+    std::shared_ptr<Entity> ptr = std::move(Entity2D::create());
+    instance = std::dynamic_pointer_cast<Game>(ptr);
 }
 
 auto Game::updateAll() -> void {
@@ -28,8 +32,4 @@ bool Game::IS_ROOT_FLAG() {
     return true;
 }
 
-auto Game::create() -> Game * {
-    Entity2D::create(nullptr);
-    return this;
-}
 

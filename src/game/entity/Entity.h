@@ -18,7 +18,7 @@ public:
     [[nodiscard]] auto getId() const -> int;
     //auto isChildOf(std::unique_ptr<Entity>& parent) const -> bool;
     auto isParentOf(const std::unique_ptr<Entity> &child) const -> bool;
-    auto addChild(std::unique_ptr<Entity>& child) -> void;
+    auto virtual addChild(std::unique_ptr<Entity>& child) -> void;
     //auto setParent(std::unique_ptr<Entity>& parent) -> void;
     //auto getSiblings() const -> std::vector<std::shared_ptr<Entity>>&;
     [[nodiscard]] auto getHierarchy() const -> std::string;
@@ -26,7 +26,7 @@ public:
     [[nodiscard]] auto getChild(int child_iter) -> std::unique_ptr<Entity>&;
     [[nodiscard]] auto getChildIter() const -> int;
 
-    auto virtual create(std::unique_ptr<Entity> &parent) -> std::unique_ptr<Entity>&;
+    auto virtual create() -> std::unique_ptr<Entity>;
 
     virtual auto IS_ROOT_FLAG() -> bool;
 

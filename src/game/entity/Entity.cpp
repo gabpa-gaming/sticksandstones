@@ -113,10 +113,9 @@ auto Entity::getChildIter() const -> int {
     return -1;
 }
 */
-auto Entity::create(std::unique_ptr<Entity>& parent) -> std::unique_ptr<Entity>& { //this is how kids are born
+auto Entity::create() -> std::unique_ptr<Entity> { //this is how kids are born
     auto p = std::make_unique<Entity>(*this);
     static int idCount = 0;
     p->id = idCount++;
-    parent -> addChild(p);
-    return p;
+    return std::move(p);
 }

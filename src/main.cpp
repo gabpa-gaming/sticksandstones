@@ -6,7 +6,7 @@
 
 auto initGameWindow()-> sf::RenderWindow*;
 
-auto initGame(sf::Window* window) -> Game*;
+auto initGame(sf::Window* window) -> std::shared_ptr<Game>;
 
 auto main() -> int {
     fmt::println("Running the game...");
@@ -22,7 +22,7 @@ auto main() -> int {
     sf::Sprite sprite;
 
     auto spr = new SpriteEntity();
-    spr->create(Game::getInstance()->getChild(2)->getChild(0), 0,0, &txt);
+    spr->create(Game::getInstance()->getChild(1), 5,5, &txt);
     fmt::print(Game::getInstance()->getHierarchy());
     while (window -> isOpen())
     {
@@ -39,7 +39,7 @@ auto main() -> int {
         window -> draw(*spr);
         window -> display();
         sf::sleep(sf::milliseconds(100));
-        dynamic_cast<Entity2D*>(Game::getInstance()->getChild(2))->dislocate(1,1);
+        //dynamic_cast<Entity2D*>(Game::getInstance()->getChild(2))->dislocate(1,1);
     }
     fmt::println("Game closed.");
     delete window;
@@ -58,20 +58,13 @@ auto initGameWindow() -> sf::RenderWindow* {
     return window;
 }
 
-auto initGame(sf::Window* window) -> Game*{
+auto initGame(sf::Window* window) -> std::shared_ptr<Game>{
 
-    Game* game = Game::getInstance();
+    Entity2D e;
+    auto ent = e.create();
+    Game::getInstance()->addChild(ent);
+    auto ent2 = e.create();
+    Game::getInstance()->addChild(ent2);
 
-    auto e1 = std::make_shared<Entity2D>(); e1 -> create(game);
-    auto e2 = std::make_shared<Entity2D>(); e2 -> create(game);
-    auto e3 = std::make_shared<Entity2D>(); e3 -> create(game);
-    auto e4 = std::make_shared<Entity2D>(); e4 -> create(game);
-    auto e5 = std::make_shared<Entity2D>(); e5 -> create(e3.get(), 1, 0);
-    auto e6 = std::make_shared<Entity2D>(); e6 -> create(e2.get(), 2 , 5);
-    auto e7 = std::make_shared<Entity2D>(); e7 -> create(e3.get(), 3, 4);
-    auto e8 = std::make_shared<Entity2D>(); e8 -> create(e5.get(), 1 , 1);
-    e5->dislocate(2,3);
-
-
-    return game;
+    return Game::getInstance();
 }

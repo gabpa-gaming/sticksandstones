@@ -10,10 +10,10 @@
 
 class Game : public virtual Entity2D {
 
-    static std::shared_ptr<Game> instance;
+    static std::shared_ptr<Game> Game::instance;
 
     public:
-    static auto getInstance() -> Game*;
+    static auto getInstance() -> std::shared_ptr<Game>; //root game entity, is a parent to all entities
 
     auto updateAll() -> void;
 
@@ -23,7 +23,9 @@ class Game : public virtual Entity2D {
 
     auto IS_ROOT_FLAG() -> bool override;
 
-    auto create() -> Game*;//root game entity, is a parent to all entities
+    static auto resetInstance() -> void;
+
+    auto create() -> std::unique_ptr<Entity> final = delete;
 };
 
 

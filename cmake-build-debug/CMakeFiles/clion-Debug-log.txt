@@ -1,9 +1,0 @@
-/home/gabrys/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/gabrys/.local/share/JetBrains/Toolbox/apps/clion/bin/ninja/linux/x64/ninja -G Ninja -S /home/gabrys/CLionProjects/sticksandstones -B /home/gabrys/CLionProjects/sticksandstones/cmake-build-debug
--- libudev stable: 1
--- Found UDev: /usr/lib/libudev.so
---    include: /usr/include
--- {fmt} version: 11.0.2
--- Build type: Debug
--- Configuring done (1.0s)
--- Generating done (0.0s)
--- Build files have been written to: /home/gabrys/CLionProjects/sticksandstones/cmake-build-debug

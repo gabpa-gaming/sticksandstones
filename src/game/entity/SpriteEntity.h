@@ -9,19 +9,21 @@
 #include "../entity/Entity2D.h"
 class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
 
-    sf::Texture * texture = nullptr;
+    std::shared_ptr<sf::Texture> texture = nullptr;
     public:
     void draw(sf::RenderWindow* w);
 
-    auto setGlobalPos(double x, double y) -> void override;
-    auto setLocalPos(double x, double y) -> void override;
+    auto setGlobalPos(float x, float y) -> void override;
+    auto setLocalPos(float x, float y) -> void override;
 
     auto getName() const -> std::string override;
-    auto create(Entity *parent) -> SpriteEntity * override;
-    auto create(Entity *parent, double localX, double localY) -> SpriteEntity * override;
-    auto virtual create(Entity *parent, double localX, double localY, sf::Texture* txt) -> SpriteEntity *;
+    //auto create() -> std::unique_ptr<Entity> override;
+    //auto create(float localX, float localY) -> std::unique_ptr<Entity> override;
+    auto virtual create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt) -> std::unique_ptr<Entity>;
 
     ~SpriteEntity() override = default;
+
+    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 
 

@@ -9,7 +9,11 @@ auto Entity::IS_ROOT_FLAG() -> bool {
 }
 
 Entity::Entity() {
-    fmt::print("Entity {} created", getName());
+    fmt::println("Entity {} created", getName());
+}
+
+Entity::~Entity() {
+    fmt::println("Entity {} deleted", getName());
 }
 
 auto Entity::getId() const -> int {
@@ -89,9 +93,8 @@ auto Entity::getName() const -> std::string {
     return fmt::format("Entity, Id:{}", id) ;
 }
 
-auto Entity::addChild(std::unique_ptr<Entity>& child) -> void {
-    auto p = std::move(child);
-    children.push_back(p);
+auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
+    children.push_back(std::move(child));
 }
 
 auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {
@@ -113,9 +116,14 @@ auto Entity::getChildIter() const -> int {
     return -1;
 }
 */
+
 auto Entity::create() -> std::unique_ptr<Entity> { //this is how kids are born
-    auto p = std::make_unique<Entity>(*this);
+    auto p = newInstanceOfThisType();
     static int idCount = 0;
     p->id = idCount++;
     return std::move(p);
+}
+
+auto Entity::newInstanceOfThisType() -> std::unique_ptr<Entity> {
+    return std::move(std::make_unique<Entity>());
 }

@@ -10,7 +10,6 @@
 
 
 class Entity2D : public virtual Entity{
-
     float x,y;
     float localX,localY;
     float parentX,parentY;
@@ -21,7 +20,7 @@ class Entity2D : public virtual Entity{
     auto getGlobalPos() const -> sf::Vector2<float>;
     auto getLocalPos() const-> sf::Vector2<float>;
     auto updateParentPos(float x, float y) -> void;
-    auto addChild(std::unique_ptr<Entity> &child) -> void override;
+    auto addChild(std::unique_ptr<Entity> &child) -> void;
 
     auto updateChildrenParentPoses(float x, float y) -> void;
     auto virtual setGlobalPos(float x, float y) -> void;
@@ -32,6 +31,7 @@ class Entity2D : public virtual Entity{
     auto create() -> std::unique_ptr<Entity> override;
     auto virtual create(float localX, float localY) -> std::unique_ptr<Entity>;
 
+    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 
 

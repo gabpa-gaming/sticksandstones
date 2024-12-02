@@ -21,9 +21,15 @@ auto main() -> int {
     txt.loadFromFile("res/char.png");
     sf::Sprite sprite;
 
-    auto spr = new SpriteEntity();
-    spr->create(Game::getInstance()->getChild(1), 5,5, &txt);
+    SpriteEntity character;
+    Game::getInstance()
+    ->getChild(1)
+    ->addChild(character.create(5,5,
+        std::make_shared<sf::Texture>(txt)));
     fmt::print(Game::getInstance()->getHierarchy());
+
+    auto spr = &Game::getInstance()->getChild(1)->getChild(0);
+
     while (window -> isOpen())
     {
         // check all the window's events that were triggered since the last iteration of the loop
@@ -36,7 +42,7 @@ auto main() -> int {
                 window -> close();
         }
         window -> clear(sf::Color::Black);
-        window -> draw(*spr);
+        window -> draw(*dynamic_cast<SpriteEntity*>(spr->get()));
         window -> display();
         sf::sleep(sf::milliseconds(100));
         //dynamic_cast<Entity2D*>(Game::getInstance()->getChild(2))->dislocate(1,1);

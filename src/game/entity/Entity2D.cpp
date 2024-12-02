@@ -21,7 +21,7 @@ auto Entity2D::updateParentPos(float x, float y) -> void {
 
 
 void Entity2D::addChild(std::unique_ptr<Entity> &child) {
-    Entity::addChild(child);
+    Entity::addChild(std::move(child));
     auto p = dynamic_cast<Entity2D*>(child.get());
     if (p != nullptr) {
         p -> updateParentPos(x,y);
@@ -29,7 +29,7 @@ void Entity2D::addChild(std::unique_ptr<Entity> &child) {
 }
 
 auto Entity2D::updateChildrenParentPoses(float x, float y) -> void {
-    for (auto child& : children) {
+    for (auto &child : children) {
         auto p = dynamic_cast<Entity2D*>(child.get());
         if (p != nullptr) {
             p -> updateParentPos(x,y);
@@ -72,15 +72,19 @@ auto Entity2D::getName() const -> std::string {
         getId(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
 }
 
-auto Entity2D::create() -> std::unique_ptr<Entity> override {
+auto Entity2D::create() -> std::unique_ptr<Entity> {
     return create(0,0);
 }
 
-auto Entity2D::create( float localX, float localY) -> std::unique_ptr<Entity> { //ugly fix maybe ////or never 😈😈😈😈 //////This comment has its own comment ////////This too //////////This too
+auto Entity2D::create( float localX, float localY) -> std::unique_ptr<Entity> { //ugly, fix maybe ////or never 😈😈😈😈 //////This comment has its own comment ////////This too //////////This too
     auto base = std::move(Entity::create());                                                        //^ an example of infinite recursion
     auto p = dynamic_cast<Entity2D*>(base.get());
     p -> x = localX; p -> y = localY;
     p -> localX = localX; p -> localY = localY;
     return base;
+}
+
+auto Entity2D::newInstanceOfThisType() -> std::unique_ptr<Entity> {
+    return std::move(std::make_unique<Entity2D>());
 }
 

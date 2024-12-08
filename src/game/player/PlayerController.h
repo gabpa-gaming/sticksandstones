@@ -13,7 +13,7 @@ class PlayerController : public virtual PhysicalObjectController {
 public:
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "PhysicsEntity";}
-
+private:
     auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 

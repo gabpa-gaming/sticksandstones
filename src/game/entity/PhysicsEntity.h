@@ -19,6 +19,8 @@ public:
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "PhysicsEntity";}
 
+    auto getName() const -> std::string;
+
     auto checkPhysicsMove(sf::Vector2f moveDelta) -> std::vector<std::reference_wrapper<CollidableEntity>>; //check if moving would result in collison
                                                                                                             //if so return colliding entities
     auto tryPhysicsMove(sf::Vector2f moveDelta) -> bool; //returns true if move was successful and no colliders are intersecting

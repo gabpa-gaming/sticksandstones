@@ -127,3 +127,6 @@ auto Entity::newInstanceOfThisType() -> std::unique_ptr<Entity> {
 template auto Entity::getAllChildrenOfTypeRecursive<PhysicsEntity>() const -> std::vector<Entity*>;
 template auto Entity::getAllChildrenOfTypeRecursive<CollidableEntity>() const -> std::vector<Entity*>;
 template auto Entity::getAllChildrenOfTypeRecursive<SpriteEntity>() const -> std::vector<Entity*>;
+template auto Entity::getAllChildrenOfTypeRecursive<TickingEntity>() const -> std::vector<Entity*>;
+
+template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> Entity*;

@@ -35,16 +35,13 @@ auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Textur
     p -> width = width;
     p -> height = height;
     if(txt) {
-        setTexture(*txt);
+        p -> setTexture(*txt);
+        p -> setSpriteIndex(0);
     }else {
         throw std::runtime_error("Set texture please 😊😊😊");
     }
 
     return base;
-}
-
-SpriteEntity::~SpriteEntity() {
-
 }
 
 std::unique_ptr<Entity> SpriteEntity::newInstanceOfThisType() {

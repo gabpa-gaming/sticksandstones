@@ -14,9 +14,7 @@ auto TickingEntity::newInstanceOfThisType() -> std::unique_ptr<Entity> {
 
 auto TickingEntity::stateMachineTick() -> void {
     tickCounter++;
-    if(currentState >= states.size()) {
-        throw std::runtime_error(fmt::format("{} is in a wrong or bugged state",getName()));
-    }
+
     if(tickCounter >= states[currentState].tickLength) {
         tickCounter -= states[currentState].tickLength;
 
@@ -24,6 +22,9 @@ auto TickingEntity::stateMachineTick() -> void {
         if(states[currentState].spriteIndex != -1) {
             auto p = getChildOfTypeRecursive<SpriteEntity>();
             dynamic_cast<SpriteEntity*>(p) -> setSpriteIndex(states[currentState].spriteIndex);
+        }
+        if(currentState >= states.size()) {
+            throw std::runtime_error(fmt::format("{} is in a wrong or bugged state",getName()));
         }
         states[currentState].startOfState(*this, states[currentState]);
 
@@ -34,4 +35,14 @@ auto TickingEntity::stateMachineTick() -> void {
 
 auto TickingEntity::inconstantTick(float deltaT) -> void {
 
+}
+
+auto TickingEntity::setStateByName(std::string stateName) -> void {
+    for (int i = 0; i < states.size(); i++) {
+        if(states[i].stateName == stateName) {
+            currentState = i;
+            return;
+        }
+    }
+    throw std::logic_error(fmt::format("{} is not a valid state name", getName()));
 }

@@ -8,7 +8,7 @@
 #include "../../headers.h"
 #include "Entity.h"
 
-class PhysicalObjectController : Entity {
+class PhysicalObjectController : public virtual Entity {
     public:
     [[nodiscard]] auto getClassName() const -> std::string override {return "PhysicalObjectController";}
     auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;

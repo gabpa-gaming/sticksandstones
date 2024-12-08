@@ -59,14 +59,14 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
             physicsUpdateAll((gameClock.getElapsedTime() - lastPhysicsTick).asSeconds());
             lastPhysicsTick = gameClock.getElapsedTime();
         }
+
         if(gameClock.getElapsedTime() - lastTick >= sf::seconds(1.0 / STATE_MACHINE_TICK_RATE)) {
-            physicsUpdateAll((gameClock.getElapsedTime() - lastPhysicsTick).asSeconds());
-            lastPhysicsTick = gameClock.getElapsedTime();
+            tickAll();
+            lastTick = gameClock.getElapsedTime();
         }
 
-
-
         frameUpdateAll((gameClock.getElapsedTime() - lastFrame).asSeconds());
+
 
         fmt::print(getHierarchy());
 

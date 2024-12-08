@@ -41,8 +41,23 @@ auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
 
     PhysicsEntity character;
     SpriteEntity sprite;
+    TickingEntity ticker;
 
-    auto s = sprite.create(5,5, loadTxt("char"));
+    auto s = sprite.create(5,5, loadTxt("character"), 32, 32);
+
+    auto sm = ticker.create();
+
+    std::vector<TickingEntity::StateMachineState> states =
+        {{0,5,1, "idle"},
+        {1,5,1},
+        {2,5,1},
+        {3,5,1},
+        {4,5,1},
+        {3,5,1},
+        {2,5,1},
+        {1,5,-7},};
+
+    dynamic_cast<TickingEntity*>(sm.get()) -> states = states;
 
     std::vector<sf::FloatRect> r;
 
@@ -52,7 +67,9 @@ auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
 
     c->addChild(std::move(s));
 
-    Game::getInstance()->addChild(std::move(c));
+    sm -> addChild(std::move(c));
+
+    Game::getInstance()->addChild(std::move(sm));
 
     Entity2D e;
 

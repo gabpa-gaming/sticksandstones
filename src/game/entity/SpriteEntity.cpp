@@ -3,7 +3,7 @@
 //
 
 #include "SpriteEntity.h"
-
+#include "../Game.h"
 void SpriteEntity::draw(sf::RenderWindow *w) {
     w -> draw(*this);
 }
@@ -18,11 +18,6 @@ void SpriteEntity::setLocalPos(float x, float y) {
     setPosition(getGlobalPos().x, getGlobalPos().y);
 }
 
-std::string SpriteEntity::getName() const {
-    return fmt::format("SpriteEntity, Id({}), At({},{}), Local({},{})",
-        getId(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
-}
-
 /*
 auto SpriteEntity::create() -> std::unique_ptr<Entity> {
     return create(0, 0);
@@ -33,16 +28,30 @@ auto SpriteEntity::create(float localX, float localY) -> std::unique_ptr<Entity>
     return create(localX, localY, std::make_unique<sf::Texture>());
 }
 */
-auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt) -> std::unique_ptr<Entity> {
-    auto base = std::move(Entity2D::create());
+auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height) -> std::unique_ptr<Entity> {
+    auto base = std::move(Entity2D::create(localX, localY));
     auto p = dynamic_cast<SpriteEntity*>(base.get());
-    p -> setScale(3.25,3.25);
-    p -> texture = txt;
-    if(txt)
-        p -> setTexture(*txt);
+    p -> setScale(Game::PIXEL_SCALE,Game::PIXEL_SCALE);
+    p -> width = width;
+    p -> height = height;
+    if(txt) {
+        setTexture(*txt);
+    }else {
+        throw std::runtime_error("Set texture please 😊😊😊");
+    }
+
     return base;
+}
+
+SpriteEntity::~SpriteEntity() {
+
 }
 
 std::unique_ptr<Entity> SpriteEntity::newInstanceOfThisType() {
     return std::move(std::make_unique<SpriteEntity>());
+}
+
+void SpriteEntity::setSpriteIndex(int sprite_index) {
+    auto rowSize = getTexture() -> getSize().x / width;
+    setTextureRect(sf::IntRect(sprite_index % rowSize * width, sprite_index / rowSize * height, width, height));
 }

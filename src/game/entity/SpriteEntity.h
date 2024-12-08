@@ -6,24 +6,27 @@
 #define SPRITEENTITY_H
 
 #include "../../headers.h"
-#include "../entity/Entity2D.h"
+#include "Entity2D.h"
+#include "TickingEntity.h"
+
 class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
 
-    std::shared_ptr<sf::Texture> texture = nullptr;
+    int width = 0, height = 0;
     public:
+    [[nodiscard]] auto getClassName() const -> std::string override {return "SpriteEntity";}
+
     void draw(sf::RenderWindow* w);
 
     auto setGlobalPos(float x, float y) -> void override;
     auto setLocalPos(float x, float y) -> void override;
 
-    auto getName() const -> std::string override;
     //auto create() -> std::unique_ptr<Entity> override;
     //auto create(float localX, float localY) -> std::unique_ptr<Entity> override;
-    auto virtual create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt) -> std::unique_ptr<Entity>;
-
-    ~SpriteEntity() override = default;
+    auto virtual create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height) -> std::unique_ptr<Entity>;
 
     auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
+
+    void setSpriteIndex(int sprite_index);
 };
 
 

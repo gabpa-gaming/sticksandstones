@@ -12,6 +12,9 @@
 #include <type_traits>
 #include <sstream>
 #include <memory>
+#include <optional>
+#include <bitset>
+#include <functional>
 
 #include "fmt/xchar.h"
 #include "SFML/Graphics.hpp"

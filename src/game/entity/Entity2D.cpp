@@ -17,15 +17,17 @@ auto Entity2D::getLocalPos() const -> sf::Vector2<float> {
 auto Entity2D::updateParentPos(float x, float y) -> void {
     parentX = x;
     parentY = y;
+    dislocate(0,0);
 }
 
 
-void Entity2D::addChild(std::unique_ptr<Entity> &child) {
-    Entity::addChild(std::move(child));
+auto Entity2D::addChild(std::unique_ptr<Entity> child) -> void {
     auto p = dynamic_cast<Entity2D*>(child.get());
     if (p != nullptr) {
+        fmt::print("Adding new child\n");
         p -> updateParentPos(x,y);
     }
+    Entity::addChild(std::move(child));
 }
 
 auto Entity2D::updateChildrenParentPoses(float x, float y) -> void {
@@ -44,23 +46,16 @@ auto Entity2D::setGlobalPos(float x, float y) -> void {
     this -> localY = y - parentY;
     for (auto &child : children) {
         auto c = dynamic_cast<Entity2D*>(child.get());
-        c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //should work
+        if(c) {
+            c->parentX = x;
+            c->parentY = y;
+            c->setLocalPos(c->localX,c->localY);
+        }
     }
-    updateChildrenParentPoses(x,y);
 }
 
 auto Entity2D::setLocalPos(const float x, const float y) -> void {
-    localX = x;
-    localY = y;
-    this -> x = parentX + localX;
-    this -> y = parentY + localY;
-
-    for (int i =  0; i < children.size(); i++) {
-        auto c = dynamic_cast<Entity2D*>(children[i].get());
-        c->setLocalPos(c -> getLocalPos().x, c -> getLocalPos().y); //reset local pos to itself so it properly changes
-    }
-    //its global pos and updates children as well
-    updateChildrenParentPoses(this->x,this->y);
+    setGlobalPos(x + parentX,y + parentY);
 }
 
 auto Entity2D::dislocate(const float x, const float y) -> void {
@@ -68,16 +63,16 @@ auto Entity2D::dislocate(const float x, const float y) -> void {
 }
 
 auto Entity2D::getName() const -> std::string {
-    return fmt::format("Entity2D, Id({}), At({},{}), Local({},{})",
-        getId(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
+    return fmt::format("{}, At({},{}), Local({},{})",
+        Entity::getName(),getGlobalPos().x,getGlobalPos().y, getLocalPos().x,getLocalPos().y);
 }
 
 auto Entity2D::create() -> std::unique_ptr<Entity> {
-    return create(0,0);
+    return Entity2D::create(0,0);
 }
 
-auto Entity2D::create( float localX, float localY) -> std::unique_ptr<Entity> { //ugly, fix maybe ////or never 😈😈😈😈 //////This comment has its own comment ////////This too //////////This too
-    auto base = std::move(Entity::create());                                                        //^ an example of infinite recursion
+auto Entity2D::create( float localX, float localY) -> std::unique_ptr<Entity> {
+    auto base = std::move(Entity::create());
     auto p = dynamic_cast<Entity2D*>(base.get());
     p -> x = localX; p -> y = localY;
     p -> localX = localX; p -> localY = localY;

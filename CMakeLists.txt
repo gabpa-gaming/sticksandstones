@@ -32,6 +32,16 @@ add_executable(main src/main.cpp
         src/helpers.h
         src/game/entity/SpriteEntity.cpp
         src/game/entity/SpriteEntity.h
+        src/game/entity/CollidableEntity.cpp
+        src/game/entity/CollidableEntity.h
+        src/game/entity/PhysicsEntity.cpp
+        src/game/entity/PhysicsEntity.h
+        src/game/player/PlayerController.cpp
+        src/game/player/PlayerController.h
+        src/game/entity/PhysicalObjectController.cpp
+        src/game/entity/PhysicalObjectController.h
+        src/game/entity/TickingEntity.cpp
+        src/game/entity/TickingEntity.h
 )
 target_link_libraries(main PRIVATE sfml-graphics fmt)
 target_compile_features(main PRIVATE cxx_std_17)

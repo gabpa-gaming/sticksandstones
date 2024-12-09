@@ -76,10 +76,9 @@ auto Entity2D::create( float localX, float localY) -> std::unique_ptr<Entity> {
     auto p = dynamic_cast<Entity2D*>(base.get());
     p -> x = localX; p -> y = localY;
     p -> localX = localX; p -> localY = localY;
+    p -> parentX = 0;
+    p -> parentY = 0;
     return base;
 }
 
-auto Entity2D::newInstanceOfThisType() -> std::unique_ptr<Entity> {
-    return std::move(std::make_unique<Entity2D>());
-}
 

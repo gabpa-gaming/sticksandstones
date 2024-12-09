@@ -4,17 +4,17 @@
 
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
-#include "../entity/PhysicalObjectController.h"
+#include "../IEventHandler.h"
+#include "../entity/ControlledPhysicsEntity.h"
 #include "../entity/TickingEntity.h"
 
 
-class PlayerController : public virtual PhysicalObjectController {
+class PlayerController : public virtual ControlledPhysicsEntity {
 
 public:
+    auto physicsUpdate(float deltaT) -> void override;
 
-    [[nodiscard]] auto getClassName() const -> std::string override {return "PhysicsEntity";}
-private:
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
+    [[nodiscard]] auto getClassName() const -> std::string override {return "PlayerController";}
 };
 
 

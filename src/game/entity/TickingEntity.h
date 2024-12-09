@@ -5,9 +5,10 @@
 #ifndef TICKINGENTITY_H
 #define TICKINGENTITY_H
 #include "Entity.h"
+#include "Entity2D.h"
 #include "../../headers.h"
 
-class TickingEntity : public virtual Entity {
+class TickingEntity : public virtual Entity2D {
 
     int tickCounter = 0;
 public:
@@ -19,20 +20,19 @@ public:
         int nextStateOffset = 1; //after this state ends next state will be currentState + nextStateOffset by default
         std::string stateName = ""; //used for simple state changes
         std::function<void(TickingEntity const& caller, StateMachineState const& stateMachineState)> perTick =
-            [](TickingEntity const& caller, StateMachineState const& stateMachineState) {};
+            [](TickingEntity const& , StateMachineState const&) {};
         std::function<void(TickingEntity const& caller, StateMachineState const& stateMachineState)> startOfState =
-            [](TickingEntity const& caller, StateMachineState const& stateMachineState) {};
+            [](TickingEntity const&, StateMachineState const&) {};
     };
 
     std::vector<StateMachineState> states;
 
     auto getClassName() const -> std::string override{return "TickingEntity";}
 
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
-
     auto virtual stateMachineTick() -> void; //ticks based on game tick rate
 
     auto virtual inconstantTick(float deltaT) -> void; //ticks every frame
+    auto setState(int n) -> void;
 
     auto setStateByName(std::string stateName) -> void;
 };

@@ -28,10 +28,10 @@ public:
     [[nodiscard]] virtual auto getName() const -> std::string;
 
     template<typename E>
-    [[nodiscard]] auto getChildOfType() const -> Entity*;
+    [[nodiscard]] auto getChildOfType() const -> E*;
 
     template<class E>
-    [[nodiscard]] auto getChildOfTypeRecursive() const -> Entity*;
+    [[nodiscard]] auto getChildOfTypeRecursive() const -> E*;
 
     template<class E>
     [[nodiscard]] auto getAllChildrenOfType() const -> std::vector<Entity *>;
@@ -41,12 +41,9 @@ public:
 
     [[nodiscard]] auto getChild(int child_iter) -> std::unique_ptr<Entity>&;
 
-    [[nodiscard]] auto getChildIter() const -> int;
-
     virtual auto create() -> std::unique_ptr<Entity>;
 
 private:
-    virtual auto newInstanceOfThisType() -> std::unique_ptr<Entity>;
 
     virtual auto IS_ROOT_FLAG() -> bool;
 public:

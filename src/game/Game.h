@@ -54,7 +54,6 @@ private:
 
     auto create() -> std::unique_ptr<Entity> override;
 
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 
 

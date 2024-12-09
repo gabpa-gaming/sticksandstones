@@ -12,6 +12,7 @@
 class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
 
     int width = 0, height = 0;
+    float flip = false;
     public:
     [[nodiscard]] auto getClassName() const -> std::string override {return "SpriteEntity";}
 
@@ -20,11 +21,11 @@ class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
     auto setGlobalPos(float x, float y) -> void override;
     auto setLocalPos(float x, float y) -> void override;
 
+    auto setFlip(bool flip) -> void;
+    auto getFlip() -> bool;
     //auto create() -> std::unique_ptr<Entity> override;
     //auto create(float localX, float localY) -> std::unique_ptr<Entity> override;
     auto virtual create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height) -> std::unique_ptr<Entity>;
-
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 
     void setSpriteIndex(int sprite_index);
 };

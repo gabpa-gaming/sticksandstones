@@ -15,6 +15,7 @@
 #include <optional>
 #include <bitset>
 #include <functional>
+#include <math.h>
 
 #include "fmt/xchar.h"
 #include "SFML/Graphics.hpp"

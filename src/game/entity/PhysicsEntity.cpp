@@ -26,7 +26,3 @@ auto PhysicsEntity::physicsUpdate(float deltaT) -> void {
     sf::Vector2f moveDelta = velocity * deltaT;
     tryPhysicsMove(moveDelta);
 }
-
-auto PhysicsEntity::newInstanceOfThisType() -> std::unique_ptr<Entity> {
-    return std::move(std::make_unique<PhysicsEntity>());
-}

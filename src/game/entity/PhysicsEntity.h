@@ -12,14 +12,14 @@
 class PhysicsEntity : public virtual CollidableEntity {
 
 public:
-    float topSpeed = 99;
+    float topSpeed = 150;
 
     sf::Vector2f velocity;
     sf::Vector2f acceleration;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "PhysicsEntity";}
 
-    auto getName() const -> std::string;
+    auto getName() const -> std::string override;
 
     auto checkPhysicsMove(sf::Vector2f moveDelta) -> std::vector<std::reference_wrapper<CollidableEntity>>; //check if moving would result in collison
                                                                                                             //if so return colliding entities
@@ -28,9 +28,6 @@ public:
     auto virtual physicsUpdate(float deltaT) -> void; //moves entity based on velocity, changes velocity based on the circumstances
 
     ~PhysicsEntity() = default;
-
-private:
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 
 

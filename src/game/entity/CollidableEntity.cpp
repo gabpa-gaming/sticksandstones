@@ -12,11 +12,6 @@ auto CollidableEntity::onCollision(CollidableEntity &other) -> void {
     fmt::print("{} collided with {}!", getName(), other.getName());
 }
 
-
-std::unique_ptr<Entity> CollidableEntity::newInstanceOfThisType() {
-    return std::move(std::make_unique<CollidableEntity>());
-}
-
 std::unique_ptr<Entity> CollidableEntity::create() {
     return CollidableEntity::create(0,0);
 }

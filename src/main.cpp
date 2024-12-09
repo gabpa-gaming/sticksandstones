@@ -6,6 +6,7 @@
 #include "game/entity/PhysicsEntity.h"
 #include "game/Game.h"
 #include "game/entity/SpriteEntity.h"
+#include "game/player/PlayerController.h"
 
 
 auto initGameWindow() -> std::shared_ptr<sf::RenderWindow>;
@@ -37,41 +38,49 @@ auto initGameWindow() -> std::shared_ptr<sf::RenderWindow> {
 }
 
 auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
-    Game::getInstance();
-
-    PhysicsEntity character;
-    SpriteEntity sprite;
-    TickingEntity ticker;
-
-    auto s = sprite.create(5,5, loadTxt("character"), 32, 32);
-
-    auto sm = ticker.create();
-
-    std::vector<TickingEntity::StateMachineState> states =
-        {{0,5,1, "idle"},
-        {1,5,1},
-        {2,5,1},
-        {3,5,1},
-        {4,5,1},
-        {3,5,1},
-        {2,5,1},
-        {1,5,-7},};
-
-    dynamic_cast<TickingEntity*>(sm.get()) -> states = states;
+    auto g = Game::getInstance();
 
     std::vector<sf::FloatRect> r;
+    auto player = (new PlayerController)->create(0,0, 0,0 , r);
 
-    auto c = character.create(0,0, 0, 0, r);
+    auto ticker = (new TickingEntity)->create();
 
-    dynamic_cast<PhysicsEntity*>(c.get())->acceleration = sf::Vector2f(120, 120);
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("character"), 32, 32);
 
-    c->addChild(std::move(s));
+    std::vector<TickingEntity::StateMachineState> states =
+        {{0,20,1, "idle"},
+        {1,10,1, "idle"},
+        {2,10,1, "idle"},
+        {3,10,1, "idle"},
+        {4,10,1, "idle"},
+        {5,20,1, "idle"},
+        {4,10,1, "idle"},
+        {3,10,1, "idle"},
+        {2,10,1, "idle"},
+        {1,10,-8, "idle"},
+        {6,5, 1, "walk"},
+        {7,5, 1, "walk"},
+        {8,5, 1, "walk"},
+        {9,5, 1, "walk"},
+        {10,5, 1, "walk"},
+        {11,5, 1, "walk"},
+        {12,5, 1, "walk"},
+        {13,5, -7, "walk"},};
 
-    sm -> addChild(std::move(c));
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+    t -> states = states;
+    t -> setStateByName("idle");
 
-    Game::getInstance()->addChild(std::move(sm));
+    auto p = dynamic_cast<PlayerController*>(player.get());
+    p -> speedGain = 900;
+    p -> topSpeed = 150;
+    ticker -> addChild(std::move(sprite));
+
+    player -> addChild(std::move(ticker));
+
+    Game::getInstance()->addChild(std::move(player));
 
     Entity2D e;
 
-    Game::getInstance()->gameLoop(w);
+    g->gameLoop(w);
 }

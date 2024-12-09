@@ -31,8 +31,6 @@ public:
 
     auto create() -> std::unique_ptr<Entity> override;
     auto virtual create(float localX, float localY) -> std::unique_ptr<Entity>;
-
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 };
 
 

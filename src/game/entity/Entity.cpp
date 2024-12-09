@@ -5,6 +5,8 @@
 
 #include "SpriteEntity.h"
 #include "../Game.h"
+#include "../player/PlayerController.h"
+
 auto Entity::IS_ROOT_FLAG() -> bool {
     return false;
 }
@@ -22,18 +24,19 @@ auto Entity::getId() const -> int {
 }
 
 template<typename E>
-auto Entity::getChildOfType() const -> Entity* { //returns the first one in hierarchy, null if not found
+auto Entity::getChildOfType() const -> E* { //returns the first one in hierarchy, null if not found
     static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
     for (auto& child : children) {
-        if (dynamic_cast<E*>(child.get())) {
-            return child.get(); // Found a child of type C
+        auto p = dynamic_cast<E*>(child.get());
+        if (p) {
+            return p; // Found a child of type C
         }
     }
     return nullptr;
 }
 
 template<typename E>
-auto Entity::getChildOfTypeRecursive() const -> Entity* { //returns the first one in hierarchy, null if not found
+auto Entity::getChildOfTypeRecursive() const -> E* { //returns the first one in hierarchy, null if not found
     static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
     auto c = getChildOfType<E>();
     if(!c) {
@@ -114,14 +117,10 @@ auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {
 }
 
 auto Entity::create() -> std::unique_ptr<Entity> { //this is how kids are born
-    auto p = newInstanceOfThisType();
+    auto p = std::unique_ptr<Entity>(this);
     static int idCount = 0;
     p->id = idCount++;
     return std::move(p);
-}
-
-auto Entity::newInstanceOfThisType() -> std::unique_ptr<Entity> {
-    return std::move(std::make_unique<Entity>());
 }
 
 template auto Entity::getAllChildrenOfTypeRecursive<PhysicsEntity>() const -> std::vector<Entity*>;
@@ -129,4 +128,6 @@ template auto Entity::getAllChildrenOfTypeRecursive<CollidableEntity>() const ->
 template auto Entity::getAllChildrenOfTypeRecursive<SpriteEntity>() const -> std::vector<Entity*>;
 template auto Entity::getAllChildrenOfTypeRecursive<TickingEntity>() const -> std::vector<Entity*>;
 
-template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> Entity*;
+template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> SpriteEntity*;
+template auto Entity::getChildOfType<TickingEntity>() const -> TickingEntity*;
+template auto Entity::getChildOfType<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;

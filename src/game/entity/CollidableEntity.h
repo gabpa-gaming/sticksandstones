@@ -30,8 +30,6 @@ public:
 
     virtual auto onCollision(CollidableEntity& other) -> void;
 
-private:
-    auto newInstanceOfThisType() -> std::unique_ptr<Entity> override;
 public:
     auto create() -> std::unique_ptr<Entity> override;
 

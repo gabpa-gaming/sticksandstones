@@ -3,6 +3,21 @@
 //
 
 #include "PlayerController.h"
-auto PlayerController::newInstanceOfThisType() -> std::unique_ptr<Entity> {
-    return std::move(std::make_unique<PlayerController>());
+
+auto PlayerController::physicsUpdate(float deltaT) -> void {
+    direction = sf::Vector2f(0,0);
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        direction.y += -1;
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        direction.x += -1;
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        direction.y += 1;
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        direction.x += 1;
+    }
+    getChildOfType<TickingEntity>() -> setStateByName(velocity != sf::Vector2f(0,0) ? "walk" : "idle");
+    ControlledPhysicsEntity::physicsUpdate(deltaT);
 }

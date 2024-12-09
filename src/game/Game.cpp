@@ -14,9 +14,11 @@
 #include "entity/TickingEntity.h"
 
 float Game::PIXEL_SCALE = 2.5;
-int Game::PHYSICS_TICK_RATE = 25;
-int Game::STATE_MACHINE_TICK_RATE = 50;
+int Game::PHYSICS_TICK_RATE = 75;
+int Game::STATE_MACHINE_TICK_RATE = 100;
 std::shared_ptr<Game> Game::instance = nullptr;
+
+
 
 auto Game::getInstance() -> std::shared_ptr<Game> {
     if(instance)
@@ -26,8 +28,7 @@ auto Game::getInstance() -> std::shared_ptr<Game> {
 }
 
 auto Game::resetInstance() -> void{
-    Game game;
-    std::shared_ptr<Entity> ptr = std::move(game.create());
+    std::shared_ptr<Entity> ptr = std::move((new Game)->create());
     instance = std::dynamic_pointer_cast<Game>(ptr);
 }
 
@@ -35,15 +36,12 @@ std::unique_ptr<Entity> Game::create() {
     return std::move(Entity2D::create());
 }
 
-auto Game::updateAll() -> void {
-    ////todo
-}
-
 auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
     gameClock.restart();
     lastPhysicsTick = gameClock.getElapsedTime();
     while (window -> isOpen())
     {
+
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
 
@@ -127,7 +125,3 @@ bool Game::IS_ROOT_FLAG() {
     return true;
 }
 
-auto Game::newInstanceOfThisType() -> std::unique_ptr<Entity> {
-    return std::move(std::make_unique<Game>());
-
-}

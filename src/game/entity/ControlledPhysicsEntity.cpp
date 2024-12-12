@@ -20,10 +20,8 @@ void ControlledPhysicsEntity::physicsUpdate(float deltaT) {
             velocity = sf::Vector2f(0,0);
         }
     }
-    bool flip = velocity.x > 0;
     if(velocity != sf::Vector2f(0,0)) {
-
-        getChildOfTypeRecursive<SpriteEntity>() -> setFlip(velocity.x < 0);
+        if(auto spr = getChildOfTypeRecursive<SpriteEntity>()) spr -> setFlip(velocity.x < 0);
     }
     PhysicsEntity::physicsUpdate(deltaT);
 }

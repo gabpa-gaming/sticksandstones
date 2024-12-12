@@ -40,12 +40,13 @@ auto SpriteEntity::create(float localX, float localY) -> std::unique_ptr<Entity>
     return create(localX, localY, std::make_unique<sf::Texture>());
 }
 */
-auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height) -> std::unique_ptr<Entity> {
+auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height, int drawOrder) -> std::unique_ptr<Entity> {
     auto base = std::move(Entity2D::create(localX, localY));
     auto p = dynamic_cast<SpriteEntity*>(base.get());
     p -> setScale(Game::PIXEL_SCALE,Game::PIXEL_SCALE);
     p -> width = width;
     p -> height = height;
+    p -> drawOrder = 0;
     if(txt) {
         p -> setTexture(*txt);
         p -> setSpriteIndex(0);

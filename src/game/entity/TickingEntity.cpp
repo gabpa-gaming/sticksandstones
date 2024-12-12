@@ -21,18 +21,19 @@ auto TickingEntity::stateMachineTick() -> void {
 }
 
 auto TickingEntity::inconstantTick(float deltaT) -> void {
+
+}
+
+auto TickingEntity::setState(int n) -> void {
+    currentState = n;
     if(states[currentState].spriteIndex != -1) {
         auto p = getChildOfTypeRecursive<SpriteEntity>();
-        dynamic_cast<SpriteEntity*>(p) -> setSpriteIndex(states[currentState].spriteIndex);
+        if(p) p -> setSpriteIndex(states[currentState].spriteIndex);
     }
     if(currentState >= states.size()) {
         throw std::runtime_error(fmt::format("{} is in a wrong or bugged state",getName()));
     }
     states[currentState].startOfState(*this, states[currentState]);
-}
-
-auto TickingEntity::setState(int n) -> void {
-    currentState = n;
 }
 
 auto TickingEntity::setStateByName(std::string stateName) -> void {

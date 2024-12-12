@@ -8,7 +8,7 @@
 #include "Entity2D.h"
 #include "../../headers.h"
 
-class TickingEntity : public virtual Entity2D {
+class TickingEntity : public virtual Entity {
 
     int tickCounter = 0;
 public:
@@ -18,11 +18,11 @@ public:
         int spriteIndex = -1; //index of sprite on texture, iterating left to right, down to bottom (-1 represents no sprite change)
         int tickLength = 1;
         int nextStateOffset = 1; //after this state ends next state will be currentState + nextStateOffset by default
-        std::string stateName = ""; //used for simple state changes
-        std::function<void(TickingEntity const& caller, StateMachineState const& stateMachineState)> perTick =
-            [](TickingEntity const& , StateMachineState const&) {};
-        std::function<void(TickingEntity const& caller, StateMachineState const& stateMachineState)> startOfState =
-            [](TickingEntity const&, StateMachineState const&) {};
+        std::string stateName; //used for simple state changes
+        std::function<void(TickingEntity & caller, StateMachineState & stateMachineState)> perTick =
+            [](TickingEntity & , StateMachineState &) {};
+        std::function<void(TickingEntity & caller, StateMachineState & stateMachineState)> startOfState =
+            [](TickingEntity &, StateMachineState &) {};
     };
 
     std::vector<StateMachineState> states;

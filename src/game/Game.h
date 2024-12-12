@@ -15,7 +15,7 @@ class Game : public virtual Entity2D {
 
     static std::shared_ptr<Game> instance;
 
-
+    static bool debugModeOn;
 
     sf::Time lastPhysicsTick;
     sf::Time lastTick;
@@ -31,19 +31,21 @@ class Game : public virtual Entity2D {
 
     static auto getInstance() -> std::shared_ptr<Game>; //root game entity, is a parent to all entities
 
+    static auto tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f;
+
     auto updateAll() -> void;
 
     auto gameLoop(std::shared_ptr<sf::RenderWindow> const &window) -> void;
 
-    auto drawFrame(std::shared_ptr<sf::RenderWindow> window) -> void;
+    auto drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void;
 
-    auto physicsUpdateAll(float deltaT) -> void;
+    auto physicsUpdateAll(float deltaT) const -> void;
 
-    auto frameUpdateAll(float deltaT) -> void;
+    auto frameUpdateAll(float deltaT) const -> void;
 
-    auto tickAll() -> void;
+    auto tickAll() const -> void;
 
-    auto rectCast(sf::FloatRect rect, std::bitset<8> mask) -> std::vector<CollidableEntity*>;
+    auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
 

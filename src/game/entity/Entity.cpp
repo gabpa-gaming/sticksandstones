@@ -131,3 +131,4 @@ template auto Entity::getAllChildrenOfTypeRecursive<TickingEntity>() const -> st
 template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> SpriteEntity*;
 template auto Entity::getChildOfType<TickingEntity>() const -> TickingEntity*;
 template auto Entity::getChildOfType<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
+template auto Entity::getChildOfType<PhysicsEntity>() const -> PhysicsEntity*;

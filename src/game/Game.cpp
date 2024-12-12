@@ -10,11 +10,14 @@
 
 #include "Game.h"
 
+
 #include "entity/SpriteEntity.h"
 #include "entity/TickingEntity.h"
 
-float Game::PIXEL_SCALE = 2.5;
-int Game::PHYSICS_TICK_RATE = 75;
+bool Game::debugModeOn = true;
+
+float Game::PIXEL_SCALE = 3;
+int Game::PHYSICS_TICK_RATE = 125;
 int Game::STATE_MACHINE_TICK_RATE = 100;
 std::shared_ptr<Game> Game::instance = nullptr;
 
@@ -25,6 +28,11 @@ auto Game::getInstance() -> std::shared_ptr<Game> {
         return instance;
     resetInstance();
     return instance;
+}
+
+auto Game::tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f {
+    const static int TILE_SIZE = 16;
+    return {pos.x * PIXEL_SCALE * TILE_SIZE, pos.y * PIXEL_SCALE * TILE_SIZE};
 }
 
 auto Game::resetInstance() -> void{
@@ -38,7 +46,11 @@ std::unique_ptr<Entity> Game::create() {
 
 auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
     gameClock.restart();
+    sf::Clock frameCounter;
+    float lastFrameTime = 60;
+
     lastPhysicsTick = gameClock.getElapsedTime();
+
     while (window -> isOpen())
     {
 
@@ -51,7 +63,7 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
             if (event.type == sf::Event::Closed)
                 window -> close();
         }
-        window -> clear(sf::Color::Black);
+        window -> clear(sf::Color(85, 85, 85));
 
         if(gameClock.getElapsedTime() - lastPhysicsTick >= sf::seconds(1.0 / PHYSICS_TICK_RATE)) {
             physicsUpdateAll((gameClock.getElapsedTime() - lastPhysicsTick).asSeconds());
@@ -66,45 +78,79 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
         frameUpdateAll((gameClock.getElapsedTime() - lastFrame).asSeconds());
 
 
-        fmt::print(getHierarchy());
+        fmt::print("{}", getHierarchy());
 
         drawFrame(window);
 
         window -> display();
         lastFrame = gameClock.getElapsedTime();
+        float currentTime = gameClock.getElapsedTime().asSeconds();
+        float fps = 1.f / (currentTime - lastFrameTime);
+        lastFrameTime = currentTime;
+        //fmt::print("FPS : {}\n", fps);
     }
     fmt::println("Game closed.");
 }
 
-auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) -> void {
-    auto drawable = getAllChildrenOfTypeRecursive<SpriteEntity>();
+auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void {
+    auto entities = getAllChildrenOfTypeRecursive<SpriteEntity>();
+    std::vector<SpriteEntity*> drawable;
+
+    std::ranges::transform(entities, std::back_inserter(drawable), [](Entity* spr) -> SpriteEntity* {
+        return dynamic_cast<SpriteEntity*>(spr);
+    });
+
+    std::ranges::sort(drawable, [](SpriteEntity* lhs, SpriteEntity* rhs) -> bool {
+        return (lhs->drawOrder != rhs->drawOrder
+        ? lhs->drawOrder > rhs->drawOrder
+        : lhs -> getPosition().y < rhs -> getPosition().y);
+    });
+
+
     for (auto entity: drawable) {
-        window.get() -> draw(*dynamic_cast<sf::Drawable*>(entity));
+        window -> draw(*dynamic_cast<sf::Drawable*>(entity));
+    }
+    if(debugModeOn) {
+        auto debugColliders =  getAllChildrenOfTypeRecursive<CollidableEntity>();
+
+        std::ranges::for_each(debugColliders, [window](Entity* ent) -> void {
+            auto p = dynamic_cast<CollidableEntity*>(ent);
+            if(!p) {
+                return;
+            }
+            sf::RectangleShape rectangle;
+            rectangle.setPosition(p->collider.getPosition());
+            rectangle.setSize(p->collider.getSize());
+            rectangle.setOutlineThickness(1);
+            rectangle.setFillColor(sf::Color(0,0,0,0));
+            rectangle.setOutlineColor(sf::Color::Green);
+            window->draw(rectangle);
+        });
     }
 }
 
-auto Game::physicsUpdateAll(float deltaT) -> void {
+auto Game::physicsUpdateAll(float deltaT) const -> void {
     auto physicsEntities = getAllChildrenOfTypeRecursive<PhysicsEntity>();
-    for(auto &entity : physicsEntities) {
+    for(auto entity : physicsEntities) {
         dynamic_cast<PhysicsEntity*>(entity) -> physicsUpdate(deltaT);
     }
 }
 
-auto Game::frameUpdateAll(float deltaT) -> void {
+auto Game::frameUpdateAll(float deltaT) const -> void {
     auto tickable = getAllChildrenOfTypeRecursive<TickingEntity>();
     for (auto entity: tickable) {
         dynamic_cast<TickingEntity*>(entity) -> inconstantTick(deltaT);
     }
 }
 
-auto Game::tickAll() -> void {
+auto Game::tickAll() const -> void {
     auto tickable = getAllChildrenOfTypeRecursive<TickingEntity>();
     for (auto entity: tickable) {
         dynamic_cast<TickingEntity*>(entity) -> stateMachineTick();
     }
 }
 
-auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) -> std::vector<CollidableEntity*> {
+auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*> {
     auto collidableEntity = getAllChildrenOfTypeRecursive<CollidableEntity>();
     std::vector<CollidableEntity*> out;
     for(auto entity : collidableEntity) {

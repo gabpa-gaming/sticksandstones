@@ -18,6 +18,5 @@ auto PlayerController::physicsUpdate(float deltaT) -> void {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
         direction.x += 1;
     }
-    getChildOfType<TickingEntity>() -> setStateByName(velocity != sf::Vector2f(0,0) ? "walk" : "idle");
     ControlledPhysicsEntity::physicsUpdate(deltaT);
 }

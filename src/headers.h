@@ -16,6 +16,9 @@
 #include <bitset>
 #include <functional>
 #include <math.h>
+#include <algorithm>
+#include <ranges>
+#include <random>
 
 #include "fmt/xchar.h"
 #include "SFML/Graphics.hpp"

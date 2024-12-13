@@ -3,6 +3,7 @@
 //
 #include "Entity.h"
 
+#include "HealthController.h"
 #include "SpriteEntity.h"
 #include "../Game.h"
 #include "../player/PlayerController.h"
@@ -17,6 +18,12 @@ Entity::Entity() {
 
 Entity::~Entity() {
     fmt::println("{} deleted", Entity::getName());
+}
+
+auto Entity::init(Entity *parent) -> void {
+    initialized = true;
+    this->parent = parent;
+    fmt::println("{} initialized", Entity::getName());
 }
 
 auto Entity::getId() const -> int {
@@ -79,6 +86,19 @@ auto Entity::getAllChildrenOfTypeRecursive() const -> std::vector<Entity*> {
     return out;
 }
 
+template<typename E>
+auto Entity::getInParents() -> E* {
+    static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
+    auto p = dynamic_cast<E*>(this->parent);
+    if(p) {
+        return p;
+    }
+    if(parent == nullptr) {
+        throw std::logic_error("Entity not found in parents");
+    }
+    return parent->getInParents<E>();
+}
+
 auto Entity::isParentOf(const std::unique_ptr<Entity>& child) const -> bool {
     for (auto &kid: children) {
         if(kid == child) {
@@ -107,6 +127,8 @@ auto Entity::getName() const -> std::string {
 
 auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
     children.push_back(std::move(child));
+    children.back()->init(this);
+
 }
 
 auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {
@@ -129,6 +151,11 @@ template auto Entity::getAllChildrenOfTypeRecursive<SpriteEntity>() const -> std
 template auto Entity::getAllChildrenOfTypeRecursive<TickingEntity>() const -> std::vector<Entity*>;
 
 template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> SpriteEntity*;
+template auto Entity::getChildOfTypeRecursive<TickingEntity>() const -> TickingEntity*;
+template auto Entity::getChildOfTypeRecursive<HealthController>() const -> HealthController*;
+template auto Entity::getChildOfTypeRecursive<PlayerController>() const -> PlayerController*;
 template auto Entity::getChildOfType<TickingEntity>() const -> TickingEntity*;
 template auto Entity::getChildOfType<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
 template auto Entity::getChildOfType<PhysicsEntity>() const -> PhysicsEntity*;
+
+template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;

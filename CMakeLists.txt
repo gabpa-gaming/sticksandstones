@@ -48,6 +48,8 @@ add_executable(main src/main.cpp
         src/game/Tilemap.h
         src/game/Builders.cpp
         src/game/Builders.h
+        src/game/entity/HealthController.cpp
+        src/game/entity/HealthController.h
 )
 target_link_libraries(main PRIVATE sfml-graphics fmt)
 target_compile_features(main PRIVATE cxx_std_20)

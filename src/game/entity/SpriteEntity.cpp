@@ -61,4 +61,5 @@ void SpriteEntity::setSpriteIndex(int sprite_index) {
     auto rowSize = getTexture() -> getSize().x / width;
     setTextureRect(sf::IntRect(sprite_index % rowSize * width, sprite_index / rowSize * height, width, height));
     setOrigin(width/2,height/2);
+    setColor({255,255,255,255});
 }

@@ -13,9 +13,12 @@ protected:
     const std::string typeName = "Entity";
     int id = -1;
     std::vector<std::unique_ptr<Entity>> children;
-
+    bool initialized = false;
+    Entity* parent = nullptr;
 public:
-    [[nodiscard]] auto  virtual getClassName() const -> std::string {return "Entity";}
+    [[nodiscard]] auto virtual getClassName() const -> std::string {return "Entity";}
+
+    auto virtual init(Entity * parent) -> void;
 
     [[nodiscard]] auto getId() const -> int;
 
@@ -40,6 +43,9 @@ public:
     [[nodiscard]] auto getAllChildrenOfTypeRecursive() const -> std::vector<Entity *>;
 
     [[nodiscard]] auto getChild(int child_iter) -> std::unique_ptr<Entity>&;
+
+    template<typename E>
+    [[nodiscard]] auto getInParents() -> E*;
 
     virtual auto create() -> std::unique_ptr<Entity>;
 

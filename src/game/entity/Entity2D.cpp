@@ -27,7 +27,7 @@ auto Entity2D::addChild(std::unique_ptr<Entity> child) -> void {
         fmt::print("Adding new child\n");
         p -> updateParentPos(x,y);
     }
-    Entity::addChild(std::move(child));
+    return Entity::addChild(std::move(child));
 }
 
 auto Entity2D::updateChildrenParentPoses(float x, float y) -> void {

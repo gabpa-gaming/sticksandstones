@@ -10,8 +10,8 @@
 
 class TickingEntity : public virtual Entity {
 
-    int tickCounter = 0;
 public:
+    int tickCounter = 0;
     int currentState = 0;
 
     struct StateMachineState {
@@ -34,7 +34,7 @@ public:
     auto virtual inconstantTick(float deltaT) -> void; //ticks every frame
     auto setState(int n) -> void;
 
-    auto setStateByName(std::string stateName) -> void;
+    auto setStateByName(const std::string &stateName) -> bool;
 };
 
 

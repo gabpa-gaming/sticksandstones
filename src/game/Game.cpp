@@ -22,7 +22,6 @@ int Game::STATE_MACHINE_TICK_RATE = 100;
 std::shared_ptr<Game> Game::instance = nullptr;
 
 
-
 auto Game::getInstance() -> std::shared_ptr<Game> {
     if(instance)
         return instance;
@@ -53,7 +52,6 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
 
     while (window -> isOpen())
     {
-
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
 
@@ -78,7 +76,7 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
         frameUpdateAll((gameClock.getElapsedTime() - lastFrame).asSeconds());
 
 
-        fmt::print("{}", getHierarchy());
+        //fmt::print("{}", getHierarchy());
 
         drawFrame(window);
 

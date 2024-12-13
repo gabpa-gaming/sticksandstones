@@ -24,7 +24,7 @@ auto TickingEntity::inconstantTick(float deltaT) -> void {
 
 }
 
-auto TickingEntity::setState(int n) -> void {
+auto TickingEntity::setState(const int n) -> void {
     currentState = n;
     if(states[currentState].spriteIndex != -1) {
         auto p = getChildOfTypeRecursive<SpriteEntity>();
@@ -36,15 +36,15 @@ auto TickingEntity::setState(int n) -> void {
     states[currentState].startOfState(*this, states[currentState]);
 }
 
-auto TickingEntity::setStateByName(std::string stateName) -> void {
+auto TickingEntity::setStateByName(const std::string &stateName) -> bool {
     if(states[currentState].stateName == stateName) {
-        return;
+        return true;
     }
     for (int i = 0; i < states.size(); i++) {
         if(states[i].stateName == stateName) {
             setState(i);
-            return;
+            return true;
         }
     }
-    throw std::logic_error(fmt::format("{} is not a valid state name", getName()));
+    return false;
 }

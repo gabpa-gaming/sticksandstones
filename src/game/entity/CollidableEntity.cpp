@@ -19,10 +19,26 @@ auto CollidableEntity::setGlobalPos(float x, float y) -> void {
     collider = sf::FloatRect(getGlobalPos() + colliderOffset * (float)16*Game::PIXEL_SCALE
         - sf::Vector2f(width,height) * Game::PIXEL_SCALE * (float)8,
         Game::tilePosToScreenCoords({width, height}));
+    auto col = checkPosForCollisons();
+    if(!col.empty()) {
+        col[0]->onCollision(this);
+    }
 }
 
-auto CollidableEntity::onCollision(CollidableEntity &other) -> void {
-    fmt::println("{} collided with {}!", getName(), other.getName());
+auto CollidableEntity::checkPosForCollisons() const -> std::vector<CollidableEntity *> {
+    auto movedCollider = sf::FloatRect(collider.getPosition(), collider.getSize());
+    auto collisions = Game::getInstance()->rectCast(movedCollider, collidesWith);
+    for (int i = 0; i < collisions.size(); i++) {
+        if(collisions[i] == this) {
+            collisions.erase(collisions.begin() + i);
+            break;
+        }
+    }
+    return collisions;
+}
+
+auto CollidableEntity::onCollision(CollidableEntity *other) -> void {
+    fmt::println("{} collided with {}!", getName(), other->getName());
 }
 
 auto CollidableEntity::create()-> std::unique_ptr<Entity> {

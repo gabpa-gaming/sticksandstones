@@ -27,7 +27,7 @@ auto PhysicsEntity::tryPhysicsMove(sf::Vector2f moveDelta) -> bool {
         dislocate(moveDelta.x, moveDelta.y);
         return true;
     }
-    onCollision(*cols[0]);
+    onCollision(cols[0]);
 
     auto colsXIncrement = checkPhysicsMove({moveDelta.x,0});
 

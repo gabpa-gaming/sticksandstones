@@ -10,6 +10,15 @@
 
 #include "Builders.h"
 
+#include "entity/HealthController.h"
+
+auto blinker = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
+    const int CHANGE_TICK_COUNT = 5;
+    caller.getChildOfType<SpriteEntity>()->setColor((caller.tickCounter / CHANGE_TICK_COUNT % 2 == 0)
+        ? sf::Color{0,0,0,0}
+        : sf::Color{255,255,255,255});
+};
+
 auto buildPlayer() -> std::unique_ptr<Entity> {
     auto player = (new PlayerController)->create(0,0,
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
@@ -17,12 +26,16 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
     auto ticker = (new TickingEntity)->create();
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("character"), 32, 32);
 
-    auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
-        caller.setStateByName(caller.getChildOfType<PhysicsEntity>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
-    };
+    auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
+                                                           0, 1,1, 20, 0);
 
-    std::vector<TickingEntity::StateMachineState> states =
-        {{0,20,1, "idle", stateChanger},
+    auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
+        caller.setStateByName(caller.getChildOfTypeRecursive<PlayerController>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
+    };
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+        t -> states =
+        {{12,50, 1, "damage", blinker},
+        {0,20,1, "idle", stateChanger},
         {1,10,1, "idle", stateChanger},
         {2,10,1, "idle", stateChanger},
         {3,10,1, "idle", stateChanger},
@@ -33,20 +46,20 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
         {8,7, 1, "walk", stateChanger},
         {9,7, 1, "walk", stateChanger},
         {10,7, 1, "walk", stateChanger},
-        {11,7, -6, "walk", stateChanger},};
-
-    auto t = dynamic_cast<TickingEntity*>(ticker.get());
-    t -> states = states;
+        {11,7, -6, "walk", stateChanger},
+        };
     t -> setStateByName("idle");
 
     auto p = dynamic_cast<PlayerController*>(player.get());
     p -> speedGain = 1026;
     p -> topSpeed = 150;
-    player -> addChild(std::move(sprite));
+
+    ticker -> addChild(std::move(player));
+
+    p -> addChild(std::move(sprite));
+    p -> addChild(std::move(healthController));
     p -> setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
 
-;
-    ticker -> addChild(std::move(player));
 
     p -> colliderOffset = sf::Vector2f(0, 0.35);
     return std::move(ticker);
@@ -62,15 +75,16 @@ auto buildBat() -> std::unique_ptr<Entity> {
         caller.setStateByName(caller.getChildOfType<PhysicsEntity>() -> velocity != sf::Vector2f(0,0) ? "sleep" : "fly");
     };
     std::vector<TickingEntity::StateMachineState> states =
-    {{5,1,0, "sleep", stateChanger},
-        {0,5,1, "fly", stateChanger},
-        {1,5,1, "fly", stateChanger},
-        {2,5,1, "fly", stateChanger},
-        {3,5,1, "fly", stateChanger},
-        {4,5,1, "fly", stateChanger},
-{3,5,1, "fly", stateChanger},
-{2,5,1, "fly", stateChanger},
-{1,5,-7, "fly", stateChanger},
+    {{5,10,0, "damage"},
+    {5,1,0, "sleep", stateChanger},
+    {0,5,1, "fly", stateChanger},
+    {1,5,1, "fly", stateChanger},
+    {2,5,1, "fly", stateChanger},
+    {3,5,1, "fly", stateChanger},
+    {4,5,1, "fly", stateChanger},
+    {3,5,1, "fly", stateChanger},
+    {2,5,1, "fly", stateChanger},
+    {1,5,-7, "fly", stateChanger},
     };
 
     auto t = dynamic_cast<TickingEntity*>(ticker.get());
@@ -81,11 +95,19 @@ auto buildBat() -> std::unique_ptr<Entity> {
     p -> speedGain = 1026;
     p -> topSpeed = 150;
     bat -> addChild(std::move(sprite));
-    p -> setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
 
-    ;
+
+    auto health = (new HealthController)->create(0,0,
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::projectile),
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
+        1,1, 20,5);
+
+
     ticker -> addChild(std::move(bat));
 
+    p -> addChild(std::move(health));
+
+    p -> setGlobalPos(192 * Game::PIXEL_SCALE/2 - 64,160 *Game::PIXEL_SCALE/2);
     p -> colliderOffset = sf::Vector2f(0, 0.35);
     return std::move(ticker);
 }

@@ -29,11 +29,11 @@ class Game : public virtual Entity2D {
     static int PHYSICS_TICK_RATE;
     static int STATE_MACHINE_TICK_RATE;
 
+    std::vector<std::tuple<std::unique_ptr<Entity>*, Entity *>> toBeInitialized;
+
     static auto getInstance() -> std::shared_ptr<Game>; //root game entity, is a parent to all entities
 
     static auto tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f;
-
-    auto updateAll() -> void;
 
     auto gameLoop(std::shared_ptr<sf::RenderWindow> const &window) -> void;
 
@@ -48,6 +48,8 @@ class Game : public virtual Entity2D {
     auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
+
+    void setToBeInitialized(std::unique_ptr<Entity>& child, Entity * parent);
 
     static auto resetInstance() -> void;
 

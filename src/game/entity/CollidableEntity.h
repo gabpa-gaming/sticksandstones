@@ -25,21 +25,21 @@ public:
         enemy,
         item,
         destructible,
+        projectile,
     };
 
     static int getAsBitMask(ColliderType type);
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "CollidableEntity";}
 
-
-
     auto getColliders() const -> std::vector<sf::FloatRect>;
 
     auto setGlobalPos(float x, float y) -> void override;
 
-    virtual auto onCollision(CollidableEntity& other) -> void;
+    auto checkPosForCollisons() const -> std::vector<CollidableEntity *>;
 
-public:
+    virtual auto onCollision(CollidableEntity *other) -> void;
+
     auto create() -> std::unique_ptr<Entity> override;
 
     auto create(float localX, float localY) -> std::unique_ptr<Entity> override;

@@ -38,7 +38,7 @@ auto CollidableEntity::checkPosForCollisons() const -> std::vector<CollidableEnt
 }
 
 auto CollidableEntity::onCollision(CollidableEntity *other) -> void {
-    fmt::println("{} collided with {}!", getName(), other->getName());
+    //fmt::println("{} collided with {}!", getName(), other->getName());
 }
 
 auto CollidableEntity::create()-> std::unique_ptr<Entity> {
@@ -52,11 +52,10 @@ auto CollidableEntity::create(float localX, float localY) -> std::unique_ptr<Ent
 
 auto CollidableEntity::create(float x, float y, std::bitset<8> collisionMask, std::bitset<8> collidesWith, float width, float height) -> std::unique_ptr<Entity> {
     auto base = std::move(Entity2D::create(x, y));
-    auto p = dynamic_cast<CollidableEntity*>(base.get());
-    p -> collisionMask = collisionMask;
-    p -> collidesWith = collidesWith;
-    p -> width = width;
-    p -> height = height;
-    p -> collider = sf::FloatRect(getGlobalPos(), Game::tilePosToScreenCoords({width, height}));
+    this -> collisionMask = collisionMask;
+    this -> collidesWith = collidesWith;
+    this -> width = width;
+    this -> height = height;
+    collider = sf::FloatRect(getGlobalPos(), Game::tilePosToScreenCoords({width, height}));
     return base;
 }

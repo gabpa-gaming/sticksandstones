@@ -20,6 +20,11 @@ public:
 
     auto virtual init(Entity * parent) -> void;
 
+    auto initAllChildren(Entity* parent) -> void;
+
+    template<typename E>
+    auto getAs() -> Entity&;
+
     [[nodiscard]] auto getId() const -> int;
 
     [[nodiscard]] auto isParentOf(const std::unique_ptr<Entity> &child) const -> bool;

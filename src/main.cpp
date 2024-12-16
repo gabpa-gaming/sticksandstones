@@ -1,5 +1,6 @@
 
 #include "headers.h"
+#include "fmt/chrono.h"
 #include "game/Game.h"
 #include "game/entity/CollidableEntity.h"
 #include "game/entity/Entity.h"
@@ -50,5 +51,6 @@ auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
     g->addChild(std::move(buildBat()));
     dynamic_cast<Entity2D*>(g -> getChild(2).get()) -> setGlobalPos((192 + 32) * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
 
+    g->initAllChildren(nullptr);
     g->gameLoop(w);
 }

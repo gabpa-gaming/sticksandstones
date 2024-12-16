@@ -14,7 +14,9 @@ class HealthController : public virtual CollidableEntity {
 
     TickingEntity* stateMachine = nullptr;
 
+    sf::Clock clock;
     public:
+    float invTime = 0.f;
 
     float contactDamage = 0;
 

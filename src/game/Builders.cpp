@@ -13,8 +13,8 @@
 #include "entity/HealthController.h"
 
 auto blinker = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
-    const int CHANGE_TICK_COUNT = 5;
-    caller.getChildOfType<SpriteEntity>()->setColor((caller.tickCounter / CHANGE_TICK_COUNT % 2 == 0)
+    const int CHANGE_TICK_COUNT = 20;
+    caller.getChildOfTypeRecursive<SpriteEntity>()->setColor((caller.tickCounter / CHANGE_TICK_COUNT % 2 == 0)
         ? sf::Color{0,0,0,0}
         : sf::Color{255,255,255,255});
 };
@@ -29,12 +29,14 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
     auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
                                                            0, 1,1, 20, 0);
 
+    dynamic_cast<HealthController*>(healthController.get())->invTime = 1;
+
     auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
         caller.setStateByName(caller.getChildOfTypeRecursive<PlayerController>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
     };
     auto t = dynamic_cast<TickingEntity*>(ticker.get());
         t -> states =
-        {{12,50, 1, "damage", blinker},
+        {{12,100, 1, "damage", blinker},
         {0,20,1, "idle", stateChanger},
         {1,10,1, "idle", stateChanger},
         {2,10,1, "idle", stateChanger},

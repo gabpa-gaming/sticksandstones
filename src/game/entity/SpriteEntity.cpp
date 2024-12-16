@@ -58,6 +58,19 @@ auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Textur
 }
 
 void SpriteEntity::setSpriteIndex(int sprite_index) {
+    int spriteCount = getTexture() -> getSize().x * getTexture() -> getSize().y / width / height;
+    if(spriteCount == 0) {
+        fmt::println("ERROR: Texture too big... sizing down.");
+        width = 16;
+        height = 16;
+        setTexture(*loadTxt("msg"));
+        setSpriteIndex(sprite_index);
+        return;
+    }
+    if(sprite_index >= spriteCount) {
+        setSpriteIndex(sprite_index % spriteCount);
+        return;
+    }
     auto rowSize = getTexture() -> getSize().x / width;
     setTextureRect(sf::IntRect(sprite_index % rowSize * width, sprite_index / rowSize * height, width, height));
     setOrigin(width/2,height/2);

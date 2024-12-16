@@ -26,8 +26,21 @@ auto Entity::init(Entity *parent) -> void {
     fmt::println("{} initialized", Entity::getName());
 }
 
+auto Entity::initAllChildren(Entity *parent) -> void {
+    init(parent);
+    for (auto &child : children) {
+        child->initAllChildren(this);
+    }
+}
+
 auto Entity::getId() const -> int {
     return id;
+}
+
+template<typename E>
+auto Entity::getAs() -> Entity & {
+    static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
+    return static_cast<E&>(*this);
 }
 
 template<typename E>
@@ -127,8 +140,6 @@ auto Entity::getName() const -> std::string {
 
 auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
     children.push_back(std::move(child));
-    children.back()->init(this);
-
 }
 
 auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {

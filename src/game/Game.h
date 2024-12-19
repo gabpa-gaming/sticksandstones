@@ -9,6 +9,8 @@
 #include "entity/Entity.h"
 #include "entity/Entity2D.h"
 #include "entity/CollidableEntity.h"
+#include "level/Room.h"
+#include "player/PlayerController.h"
 
 
 class Game : public virtual Entity2D {
@@ -18,9 +20,13 @@ class Game : public virtual Entity2D {
     static bool debugModeOn;
 
     sf::Time lastPhysicsTick;
-    sf::Time lastTick;
+    sf::Time lastStateMachineTick;
     sf::Time lastFrame;
     sf::Clock gameClock;
+
+    Entity * player = nullptr;
+
+
 
     public:
 
@@ -29,7 +35,9 @@ class Game : public virtual Entity2D {
     static int PHYSICS_TICK_RATE;
     static int STATE_MACHINE_TICK_RATE;
 
-    std::vector<std::tuple<std::unique_ptr<Entity>*, Entity *>> toBeInitialized;
+    Room * currentRoom = nullptr;
+
+    std::vector<Entity *> toRemove;
 
     static auto getInstance() -> std::shared_ptr<Game>; //root game entity, is a parent to all entities
 
@@ -47,9 +55,11 @@ class Game : public virtual Entity2D {
 
     auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
 
-    [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
+    auto getPlayer() const -> Entity const&;
 
-    void setToBeInitialized(std::unique_ptr<Entity>& child, Entity * parent);
+    auto setPlayer(Entity &p) -> void;
+
+    [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
 
     static auto resetInstance() -> void;
 

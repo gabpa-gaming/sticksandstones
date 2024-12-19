@@ -11,13 +11,14 @@
 #include "Game.h"
 
 
+#include "Builders.h"
 #include "entity/SpriteEntity.h"
 #include "entity/TickingEntity.h"
 
 bool Game::debugModeOn = true;
 
 float Game::PIXEL_SCALE = 3;
-int Game::PHYSICS_TICK_RATE = 125;
+int Game::PHYSICS_TICK_RATE = 35;
 int Game::STATE_MACHINE_TICK_RATE = 100;
 std::shared_ptr<Game> Game::instance = nullptr;
 
@@ -47,7 +48,7 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
     gameClock.restart();
     sf::Clock frameCounter;
     float lastFrameTime = 60;
-
+    float fps;
     lastPhysicsTick = gameClock.getElapsedTime();
 
     while (window -> isOpen())
@@ -65,16 +66,23 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
 
         if(gameClock.getElapsedTime() - lastPhysicsTick >= sf::seconds(1.0 / PHYSICS_TICK_RATE)) {
             physicsUpdateAll((gameClock.getElapsedTime() - lastPhysicsTick).asSeconds());
+            //fmt::println("PTick: {}", (gameClock.getElapsedTime() - lastPhysicsTick).asMilliseconds());
             lastPhysicsTick = gameClock.getElapsedTime();
         }
 
-        if(gameClock.getElapsedTime() - lastTick >= sf::seconds(1.0 / STATE_MACHINE_TICK_RATE)) {
+        if(gameClock.getElapsedTime() - lastStateMachineTick >= sf::seconds(1.0 / STATE_MACHINE_TICK_RATE)) {
             tickAll();
-            lastTick = gameClock.getElapsedTime();
+            //fmt::println("SMTick: {}", (gameClock.getElapsedTime() - lastStateMachineTick).asMilliseconds());
+            lastStateMachineTick = gameClock.getElapsedTime();
         }
 
         frameUpdateAll((gameClock.getElapsedTime() - lastFrame).asSeconds());
 
+
+        while(!toRemove.empty()) {
+            toRemove[0] -> remove();
+            toRemove.erase(toRemove.begin());
+        }
 
         //fmt::print("{}", getHierarchy());
 
@@ -83,7 +91,7 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
         window -> display();
         lastFrame = gameClock.getElapsedTime();
         float currentTime = gameClock.getElapsedTime().asSeconds();
-        float fps = 1.f / (currentTime - lastFrameTime);
+        fps = (1.f / (currentTime - lastFrameTime)+fps)/2;
         lastFrameTime = currentTime;
         //fmt::print("FPS : {}\n", fps);
     }
@@ -100,20 +108,20 @@ auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void {
 
     std::ranges::sort(drawable, [](SpriteEntity* lhs, SpriteEntity* rhs) -> bool {
         return (lhs->drawOrder != rhs->drawOrder
-        ? lhs->drawOrder > rhs->drawOrder
+        ? lhs->drawOrder < rhs->drawOrder
         : lhs -> getPosition().y < rhs -> getPosition().y);
     });
 
 
     for (auto entity: drawable) {
-        window -> draw(*dynamic_cast<sf::Drawable*>(entity));
+        if(entity->getEnabled()) window -> draw(*dynamic_cast<sf::Drawable*>(entity));
     }
     if(debugModeOn) {
-        auto debugColliders =  getAllChildrenOfTypeRecursive<CollidableEntity>();
+        auto debugColliders = getAllChildrenOfTypeRecursive<CollidableEntity>();
 
         std::ranges::for_each(debugColliders, [window](Entity* ent) -> void {
             auto p = dynamic_cast<CollidableEntity*>(ent);
-            if(!p) {
+            if(!p || !p->getEnabled()) {
                 return;
             }
             sf::RectangleShape rectangle;
@@ -130,21 +138,21 @@ auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void {
 auto Game::physicsUpdateAll(float deltaT) const -> void {
     auto physicsEntities = getAllChildrenOfTypeRecursive<PhysicsEntity>();
     for(auto entity : physicsEntities) {
-        dynamic_cast<PhysicsEntity*>(entity) -> physicsUpdate(deltaT);
+        if(entity->getEnabled()) dynamic_cast<PhysicsEntity*>(entity) -> physicsUpdate(deltaT);
     }
 }
 
 auto Game::frameUpdateAll(float deltaT) const -> void {
     auto tickable = getAllChildrenOfTypeRecursive<TickingEntity>();
     for (auto entity: tickable) {
-        dynamic_cast<TickingEntity*>(entity) -> inconstantTick(deltaT);
+        if(entity->getEnabled()) dynamic_cast<TickingEntity*>(entity) -> inconstantTick(deltaT);
     }
 }
 
 auto Game::tickAll() const -> void {
     auto tickable = getAllChildrenOfTypeRecursive<TickingEntity>();
     for (auto entity: tickable) {
-        dynamic_cast<TickingEntity*>(entity) -> stateMachineTick();
+        if(entity->getEnabled()) dynamic_cast<TickingEntity*>(entity) -> stateMachineTick();
     }
 }
 
@@ -152,6 +160,7 @@ auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vecto
     auto collidableEntity = getAllChildrenOfTypeRecursive<CollidableEntity>();
     std::vector<CollidableEntity*> out;
     for(auto entity : collidableEntity) {
+        if(!entity->getEnabled()) continue;
         auto col = dynamic_cast<CollidableEntity*>(entity);
         if(!col -> collisionEnabled || !(col -> collisionMask & mask).any()) continue;
         for (auto other: col -> getColliders()) {
@@ -163,6 +172,14 @@ auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vecto
 
     }
     return out;
+}
+
+auto Game::getPlayer() const -> Entity const& {
+    return *player;
+}
+
+auto Game::setPlayer(Entity& p) -> void {
+    player = &p;
 }
 
 bool Game::IS_ROOT_FLAG() {

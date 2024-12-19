@@ -4,7 +4,7 @@
 
 #include "SpriteEntity.h"
 #include "../Game.h"
-void SpriteEntity::draw(sf::RenderWindow *w) {
+void SpriteEntity::draw(sf::RenderWindow *w) const {
     w -> draw(*this);
 }
 
@@ -23,10 +23,10 @@ auto SpriteEntity::setFlip(bool flip) -> void {
         return;
     }
     this -> flip = flip;
-    setScale(abs(getScale().x) * (flip ? -1.0 : 1.0), getScale().y);
+    setScale(abs(getScale().x) * (flip ? -1.0f : 1.0f), getScale().y);
 }
 
-auto SpriteEntity::getFlip() -> bool {
+auto SpriteEntity::getFlip() const -> bool {
     return flip;
 }
 
@@ -42,14 +42,14 @@ auto SpriteEntity::create(float localX, float localY) -> std::unique_ptr<Entity>
 */
 auto SpriteEntity::create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height, int drawOrder) -> std::unique_ptr<Entity> {
     auto base = std::move(Entity2D::create(localX, localY));
-    auto p = dynamic_cast<SpriteEntity*>(base.get());
-    p -> setScale(Game::PIXEL_SCALE,Game::PIXEL_SCALE);
-    p -> width = width;
-    p -> height = height;
-    p -> drawOrder = 0;
+
+    this -> setScale(Game::PIXEL_SCALE,Game::PIXEL_SCALE);
+    this -> width = width;
+    this -> height = height;
+    this -> drawOrder = drawOrder;
     if(txt) {
-        p -> setTexture(*txt);
-        p -> setSpriteIndex(0);
+        this -> setTexture(*txt);
+        this -> setSpriteIndex(0);
     }else {
         throw std::runtime_error("Set texture please 😊😊😊");
     }

@@ -6,9 +6,12 @@
 #include "HealthController.h"
 #include "SpriteEntity.h"
 #include "../Game.h"
+#include "../level/LevelGenerator.h"
 #include "../player/PlayerController.h"
+#include "../level/Room.h"
+#include "../projectile/Projectile.h"
 
-auto Entity::IS_ROOT_FLAG() -> bool {
+[[deprecated]] auto Entity::IS_ROOT_FLAG() -> bool {
     return false;
 }
 
@@ -18,6 +21,18 @@ Entity::Entity() {
 
 Entity::~Entity() {
     fmt::println("{} deleted", Entity::getName());
+}
+
+auto Entity::getEnabled() -> bool {
+    if(enabled && parent) {
+        return parent -> getEnabled();
+    }
+
+    return enabled;
+}
+
+auto Entity::setEnabled(bool enabled) -> void {
+    this -> enabled = enabled;
 }
 
 auto Entity::init(Entity *parent) -> void {
@@ -38,9 +53,9 @@ auto Entity::getId() const -> int {
 }
 
 template<typename E>
-auto Entity::getAs() -> Entity & {
+auto Entity::getAs()  -> E & {
     static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
-    return static_cast<E&>(*this);
+    return dynamic_cast<E&>(*this);
 }
 
 template<typename E>
@@ -121,7 +136,7 @@ auto Entity::isParentOf(const std::unique_ptr<Entity>& child) const -> bool {
     return false;
 }
 
-auto Entity::getHierarchy() const -> std::string {
+auto Entity::getHierarchy() const -> const std::string {
     std::string out = "\n";
     for(auto it = children.begin(); it != children.end(); it++) {
         std::string c = (it == children.end() - 1) ? "╚" : "╠";
@@ -135,7 +150,7 @@ auto Entity::getName() const -> std::string {
     if(id == -1) {
         return "Uninitialized entity";
     }
-    return fmt::format("{}, Id:{}", getClassName(), id) ;
+    return fmt::format("{}{}{}, Id:{}", enabled ? "" : "DISABLED ", initialized ? "":"UNINITIALIZED ", getClassName(), id) ;
 }
 
 auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
@@ -147,6 +162,18 @@ auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {
         throw std::logic_error(fmt::format("Entity doesnt have at least {} children", child_iter+1));
     }
     return (children[child_iter]);
+}
+
+auto Entity::remove() -> void {
+    int i = 0;
+    for(; i < parent->children.size(); i++) {
+        if(parent->children[0].get() == this) break;
+    }
+    parent->children.erase(parent->children.begin() + i);
+}
+
+auto Entity::endOfFrameRemove() -> void {
+    Game::getInstance()->toRemove.push_back(this);
 }
 
 auto Entity::create() -> std::unique_ptr<Entity> { //this is how kids are born
@@ -165,8 +192,19 @@ template auto Entity::getChildOfTypeRecursive<SpriteEntity>() const -> SpriteEnt
 template auto Entity::getChildOfTypeRecursive<TickingEntity>() const -> TickingEntity*;
 template auto Entity::getChildOfTypeRecursive<HealthController>() const -> HealthController*;
 template auto Entity::getChildOfTypeRecursive<PlayerController>() const -> PlayerController*;
+template auto Entity::getChildOfTypeRecursive<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
+
 template auto Entity::getChildOfType<TickingEntity>() const -> TickingEntity*;
 template auto Entity::getChildOfType<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
 template auto Entity::getChildOfType<PhysicsEntity>() const -> PhysicsEntity*;
+template auto Entity::getChildOfType<Projectile>() const -> Projectile*;
+
+template auto Entity::getAs<Entity2D>() -> Entity2D&;
+template auto Entity::getAs<HealthController>() -> HealthController&;
+template auto Entity::getAs<ControlledPhysicsEntity>() -> ControlledPhysicsEntity&;
+template auto Entity::getAs<Room>() -> Room&;
+template auto Entity::getAs<LevelGenerator>() -> LevelGenerator&;
+template auto Entity::getAs<Projectile>() -> Projectile&;
+template auto Entity::getAs<TickingEntity>() -> TickingEntity&;
 
 template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;

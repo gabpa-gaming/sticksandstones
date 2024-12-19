@@ -11,13 +11,32 @@
 #include "Builders.h"
 
 #include "entity/HealthController.h"
+#include "level/LevelGenerator.h"
+#include "level/Room.h"
+#include "projectile/Projectile.h"
 
-auto blinker = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
-    const int CHANGE_TICK_COUNT = 20;
+auto blinker(TickingEntity& caller, TickingEntity::StateMachineState&) -> void {
+    const int CHANGE_TICK_COUNT = 15;
     caller.getChildOfTypeRecursive<SpriteEntity>()->setColor((caller.tickCounter / CHANGE_TICK_COUNT % 2 == 0)
         ? sf::Color{0,0,0,0}
         : sf::Color{255,255,255,255});
-};
+}
+
+auto simpleMoveTowardsPlayer(TickingEntity& caller, TickingEntity::StateMachineState&) -> void {
+    caller.getChildOfTypeRecursive<ControlledPhysicsEntity>() -> direction
+    = normalize(-caller.getChildOfTypeRecursive<HealthController>()->getGlobalPos()
+        + Game::getInstance()
+        ->getPlayer()
+        .getChildOfTypeRecursive<HealthController>()
+        ->getGlobalPos());
+}
+auto projectileLifetimeCounter(TickingEntity& caller, TickingEntity::StateMachineState&) -> void {
+    auto proj = caller.getChildOfType<Projectile>();
+    //fmt::println("{}", Game::getInstance()->getHierarchy());
+    proj->lifetime -= 1.f/Game::STATE_MACHINE_TICK_RATE;
+    if(proj->lifetime <= 0)
+        proj->kill();
+}
 
 auto buildPlayer() -> std::unique_ptr<Entity> {
     auto player = (new PlayerController)->create(0,0,
@@ -25,18 +44,15 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::wall), 0.25, 0.25);
     auto ticker = (new TickingEntity)->create();
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("character"), 32, 32);
-
     auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-                                                           0, 1,1, 20, 0);
-
-    dynamic_cast<HealthController*>(healthController.get())->invTime = 1;
-
+                                                           0, 0.5,1, 20, 0);
+    healthController->getAs<HealthController>().invTime = 0.5;
     auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
         caller.setStateByName(caller.getChildOfTypeRecursive<PlayerController>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
     };
     auto t = dynamic_cast<TickingEntity*>(ticker.get());
         t -> states =
-        {{12,100, 1, "damage", blinker},
+        {{13,50, 1, "damage", blinker},
         {0,20,1, "idle", stateChanger},
         {1,10,1, "idle", stateChanger},
         {2,10,1, "idle", stateChanger},
@@ -52,18 +68,16 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
         };
     t -> setStateByName("idle");
 
-    auto p = dynamic_cast<PlayerController*>(player.get());
-    p -> speedGain = 1026;
-    p -> topSpeed = 150;
+    player->addChild(std::move(sprite));
+    player->addChild(std::move(healthController));
+
+    player->getAs<ControlledPhysicsEntity>().speedGain = 1026;
+    player->getAs<ControlledPhysicsEntity>().topSpeed = 150;
+    player->getAs<ControlledPhysicsEntity>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    player->getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
 
     ticker -> addChild(std::move(player));
 
-    p -> addChild(std::move(sprite));
-    p -> addChild(std::move(healthController));
-    p -> setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
-
-
-    p -> colliderOffset = sf::Vector2f(0, 0.35);
     return std::move(ticker);
 }
 
@@ -93,24 +107,57 @@ auto buildBat() -> std::unique_ptr<Entity> {
     t -> states = states;
     t -> setStateByName("fly");
 
-    auto p = dynamic_cast<ControlledPhysicsEntity*>(bat.get());
-    p -> speedGain = 1026;
-    p -> topSpeed = 150;
-    bat -> addChild(std::move(sprite));
+    bat-> getAs<ControlledPhysicsEntity>().speedGain = 1026;
+    bat-> getAs<ControlledPhysicsEntity>().topSpeed = 150;
+    bat -> getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
 
+    bat -> addChild(std::move(sprite));
 
     auto health = (new HealthController)->create(0,0,
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::projectile),
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
         1,1, 20,5);
-
+    bat->addChild(std::move(health));
 
     ticker -> addChild(std::move(bat));
 
-    p -> addChild(std::move(health));
+    return std::move(ticker);
+}
 
-    p -> setGlobalPos(192 * Game::PIXEL_SCALE/2 - 64,160 *Game::PIXEL_SCALE/2);
-    p -> colliderOffset = sf::Vector2f(0, 0.35);
+auto buildRat() -> std::unique_ptr<Entity> {
+    auto rat = (new ControlledPhysicsEntity)->create(0,0,
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::wall), 0.25, 0.25);
+    auto ticker = (new TickingEntity)->create();
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("szizur"), 32, 32);
+    auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+                                                           CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
+                                                           0.5,1, 20, 4);
+    healthController->getAs<HealthController>().invTime = 0;
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+    t -> states =
+    {{0,50, 7, "damage",},
+    {0,7, 1, "walk", simpleMoveTowardsPlayer },
+    {1,7, 1, "walk", simpleMoveTowardsPlayer},
+    {2,7, 1, "walk", simpleMoveTowardsPlayer},
+    {3,7, 1, "walk", simpleMoveTowardsPlayer},
+    {4,7, 1, "walk", simpleMoveTowardsPlayer},
+    {5,7, 1, "walk", simpleMoveTowardsPlayer},
+    {6,7, -6, "walk", simpleMoveTowardsPlayer},
+{7,7, -7, "walk", simpleMoveTowardsPlayer},
+    };
+    t -> setStateByName("walk");
+
+    rat->addChild(std::move(sprite));
+    rat->addChild(std::move(healthController));
+
+    rat->getAs<ControlledPhysicsEntity>().speedGain = 450;
+    rat->getAs<ControlledPhysicsEntity>().topSpeed = 165;
+    rat->getAs<ControlledPhysicsEntity>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    rat->getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
+
+    ticker -> addChild(std::move(rat));
+
     return std::move(ticker);
 }
 
@@ -119,8 +166,46 @@ auto buildRock() -> std::unique_ptr<Entity> {
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::wall)
                     + CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::destructible),
 0, 1, 1);
-    auto rSprite = (new SpriteEntity)->create(0,0, loadTxt("tileset") ,16, 16);
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("tileset") ,16, 16);
 
-    rock->addChild(std::move(rSprite));
+    rock->addChild(std::move(sprite));
     return std::move(rock);
 }
+
+auto buildRoom(Room::RoomData& data) -> std::unique_ptr<Entity> {
+    auto room = (new Room)->create(data);
+    room->getAs<Entity2D>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    return std::move(room);
+}
+
+auto buildGenerator() -> std::unique_ptr<Entity> {
+    auto levelGen = (new LevelGenerator)->create(0);
+
+    levelGen->getAs<LevelGenerator>().generateNextLevel();
+    levelGen->getAs<LevelGenerator>().setRoomToStart();
+    return std::move(levelGen);
+}
+
+auto buildBaseProjectile(float damage, float speed, std::string name, float sizeX, float sizeY,
+    const std::shared_ptr<sf::Texture>& texture, float life, CollidableEntity *ignore, sf::Vector2i orientation, float x, float y) -> std::unique_ptr<Entity> {
+
+    auto projectile = (new Projectile)->create(x,y, 0,
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player) + CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+        sizeX, sizeY, life, damage, ignore);
+    projectile->getAs<ControlledPhysicsEntity>().speedGain = 9999;
+    projectile->getAs<ControlledPhysicsEntity>().topSpeed = speed;
+    projectile->getAs<ControlledPhysicsEntity>().direction = {static_cast<float>(orientation.x), static_cast<float>(orientation.y)};
+
+    auto sprite = (new SpriteEntity)->create(x,y,texture,16,16, 1);
+
+    projectile->addChild(std::move(sprite));
+
+    auto stateMachine = (new TickingEntity)->create();
+    stateMachine->getAs<TickingEntity>().states
+    = {{0, 1, 1,"normal", projectileLifetimeCounter}};
+    stateMachine->addChild(std::move(projectile));
+
+    return std::move(stateMachine);
+}
+
+

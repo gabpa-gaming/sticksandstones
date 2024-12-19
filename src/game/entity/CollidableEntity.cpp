@@ -16,8 +16,8 @@ auto CollidableEntity::getColliders() const -> std::vector<sf::FloatRect> {
 
 auto CollidableEntity::setGlobalPos(float x, float y) -> void {
     Entity2D::setGlobalPos(x, y);
-    collider = sf::FloatRect(getGlobalPos() + colliderOffset * (float)16*Game::PIXEL_SCALE
-        - sf::Vector2f(width,height) * Game::PIXEL_SCALE * (float)8,
+    collider = sf::FloatRect(getGlobalPos() + colliderOffset * 16.f *Game::PIXEL_SCALE
+        - sf::Vector2f(width,height) * Game::PIXEL_SCALE * 8.f,
         Game::tilePosToScreenCoords({width, height}));
     auto col = checkPosForCollisons();
     if(!col.empty()) {

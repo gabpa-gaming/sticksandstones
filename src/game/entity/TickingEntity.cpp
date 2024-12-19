@@ -31,7 +31,7 @@ auto TickingEntity::setState(const int n) -> void {
         if(p) p -> setSpriteIndex(states[currentState].spriteIndex);
     }
     if(currentState >= states.size()) {
-        throw std::runtime_error(fmt::format("{} is in a wrong or bugged state",getName()));
+        setState(n-(states.size()));
     }
     states[currentState].startOfState(*this, states[currentState]);
 }

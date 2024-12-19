@@ -26,7 +26,7 @@ auto normalize(sf::Vector2f v) -> sf::Vector2f {
 
 auto loadTxt(std::string name) -> std::shared_ptr<sf::Texture> {
 
-    static std::map<std::string, std::shared_ptr<sf::Texture>> textures; //textures are loaded when needed, then exist until the program ends
+    static std::map<std::string, std::shared_ptr<sf::Texture>> textures; //textures are loaded when needed
 
     if(textures.contains(name)) {
         return textures[name];
@@ -39,5 +39,26 @@ auto loadTxt(std::string name) -> std::shared_ptr<sf::Texture> {
     if(textures[name]->loadFromFile(fmt::format("res/{}.png", name))) {
         return textures[name];
     }
+    if(name =="msg") {
+        throw std::logic_error("Even the missing texture is missing...");
+    }
     return loadTxt("msg");
+}
+
+auto rotate90CCW(sf::Vector2i v) -> sf::Vector2i {
+    return {-v.y, v.x};
+}
+
+auto rotate90CW(sf::Vector2i v) -> sf::Vector2i{
+    return {v.y, -v.x};
+}
+
+auto rotate90NTimes(sf::Vector2i v, int n) -> sf::Vector2i {
+    if(n > 0) {
+        return rotate90NTimes( rotate90CW(v), n - 1);
+    }
+    if(n < 0) {
+        return rotate90NTimes( rotate90CCW(v), n + 1);
+    }
+    return v;
 }

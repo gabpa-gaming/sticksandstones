@@ -10,20 +10,27 @@
 class Entity { //oh, the misery everybody wants to be my entity
 
 protected:
-    const std::string typeName = "Entity";
     int id = -1;
     std::vector<std::unique_ptr<Entity>> children;
+
     bool initialized = false;
     Entity* parent = nullptr;
+    bool enabled = true;
+
 public:
+
     [[nodiscard]] auto virtual getClassName() const -> std::string {return "Entity";}
+
+    auto getEnabled() -> bool;
+
+    auto setEnabled(bool enabled) -> void;
 
     auto virtual init(Entity * parent) -> void;
 
     auto initAllChildren(Entity* parent) -> void;
 
     template<typename E>
-    auto getAs() -> Entity&;
+    auto getAs()  -> E &;
 
     [[nodiscard]] auto getId() const -> int;
 
@@ -31,7 +38,7 @@ public:
 
     auto virtual addChild(std::unique_ptr<Entity> child) -> void;
 
-    [[nodiscard]] auto getHierarchy() const -> std::string;
+    [[nodiscard]] auto getHierarchy() const -> const std::string;
 
     [[nodiscard]] virtual auto getName() const -> std::string;
 
@@ -51,6 +58,10 @@ public:
 
     template<typename E>
     [[nodiscard]] auto getInParents() -> E*;
+
+    virtual auto remove() -> void;
+
+    auto endOfFrameRemove() -> void;
 
     virtual auto create() -> std::unique_ptr<Entity>;
 

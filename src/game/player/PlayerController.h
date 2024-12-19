@@ -4,15 +4,22 @@
 
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
-#include "../IEventHandler.h"
-#include "../entity/ControlledPhysicsEntity.h"
-#include "../entity/TickingEntity.h"
 
+#include "../entity/TickingEntity.h"
+#include "../entity/ControlledPhysicsEntity.h"
+
+class Projectile;
 
 class PlayerController : public virtual ControlledPhysicsEntity {
 
+    bool canAttack = true;
+
 public:
+    float attackSpeed = 0.5f;
+
     auto physicsUpdate(float deltaT) -> void override;
+
+    auto buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity>;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "PlayerController";}
 };

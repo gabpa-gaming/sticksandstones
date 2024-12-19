@@ -11,6 +11,7 @@
 
 
 #include "game/Builders.h"
+#include "game/level/Room.h"
 
 auto initGameWindow() -> std::shared_ptr<sf::RenderWindow>;
 
@@ -41,16 +42,22 @@ auto initGameWindow() -> std::shared_ptr<sf::RenderWindow> {
 }
 
 auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
+    Room::RoomData::loadAllRooms("res/rooms.data");
+
     auto g = Game::getInstance();
     auto bgr = (new SpriteEntity())->create(288,240, loadTxt("bgr") ,192, 160,-1);
 
+
     g->addChild(std::move(bgr));
-    g->addChild(std::move(buildPlayer()));
-
-    g->addChild(std::move(buildRock()));
-    g->addChild(std::move(buildBat()));
-    dynamic_cast<Entity2D*>(g -> getChild(2).get()) -> setGlobalPos((192 + 32) * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
-
+    auto player = buildPlayer();
+    g->setPlayer(*player);
+    g->addChild(std::move(player));
+    auto gen = buildGenerator();
+    g->addChild(std::move(gen));
+    g->addChild(std::move(buildRat()));
     g->initAllChildren(nullptr);
+    fmt::println("Game initialized");
+    fmt::println("{}", g->getHierarchy());
+
     g->gameLoop(w);
 }

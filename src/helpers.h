@@ -15,4 +15,10 @@ auto normalize(sf::Vector2f v) -> sf::Vector2f;
 
 auto loadTxt(std::string name) -> std::shared_ptr<sf::Texture>;
 
+auto rotate90CCW(sf::Vector2i v) -> sf::Vector2i;
+
+auto rotate90CW(sf::Vector2i v) -> sf::Vector2i;
+
+auto rotate90NTimes(sf::Vector2i v, int n) -> sf::Vector2i;
+
 #endif //HELPERS_H

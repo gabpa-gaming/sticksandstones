@@ -8,7 +8,7 @@
 #include "Entity2D.h"
 #include "../../headers.h"
 
-class TickingEntity : public virtual Entity {
+class TickingEntity : public virtual Entity2D {
 
 public:
     int tickCounter = 0;

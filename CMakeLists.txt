@@ -44,12 +44,20 @@ add_executable(main src/main.cpp
         src/game/entity/TickingEntity.h
         src/game/IEventHandler.cpp
         src/game/IEventHandler.h
-        src/game/Tilemap.cpp
-        src/game/Tilemap.h
         src/game/Builders.cpp
         src/game/Builders.h
         src/game/entity/HealthController.cpp
         src/game/entity/HealthController.h
+        src/game/level/Room.cpp
+        src/game/level/Room.h
+        src/game/level/LevelGenerator.cpp
+        src/game/level/LevelGenerator.h
+        src/game/level/Interactible.cpp
+        src/game/level/Interactible.h
+        src/game/level/Interactor.cpp
+        src/game/level/Interactor.h
+        src/game/projectile/Projectile.cpp
+        src/game/projectile/Projectile.h
 )
 target_link_libraries(main PRIVATE sfml-graphics fmt)
 target_compile_features(main PRIVATE cxx_std_20)

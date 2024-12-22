@@ -16,7 +16,7 @@ class PlayerController : public virtual ControlledPhysicsEntity {
 
 public:
     float attackSpeed = 0.5f;
-
+    float range = 0.65f;
     auto physicsUpdate(float deltaT) -> void override;
 
     auto buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity>;

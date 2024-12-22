@@ -7,13 +7,10 @@
 #include "../entity/CollidableEntity.h"
 
 
-class Interactible;
 
-class Interactor : CollidableEntity {
-
-    std::vector<Interactible*> inRange;
-
-    auto setGlobalPos(float x, float y) -> void override;
+class Interactor : public virtual CollidableEntity {
+public:
+    [[nodiscard]] auto getClassName() const -> std::string override { return "Interactor";}
 
     auto interactClosest() -> void;
 

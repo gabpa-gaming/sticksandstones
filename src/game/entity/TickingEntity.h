@@ -8,7 +8,7 @@
 #include "Entity2D.h"
 #include "../../headers.h"
 
-class TickingEntity : public virtual Entity2D {
+class TickingEntity : public virtual Entity2D { //loosely inspired by state machine system in doom
 
 public:
     int tickCounter = 0;

@@ -13,6 +13,8 @@
 #include "game/Builders.h"
 #include "game/level/Room.h"
 
+
+
 auto initGameWindow() -> std::shared_ptr<sf::RenderWindow>;
 
 auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void;
@@ -30,7 +32,9 @@ auto main() -> int {
 }
 
 auto initGameWindow() -> std::shared_ptr<sf::RenderWindow> {
-    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(576, 480), "Sticks and stones");
+    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode(
+        GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE, GAME_HEIGHT_UNSCALED * Game::PIXEL_SCALE),
+        "Sticks and stones");
     //window -> setFramerateLimit(60);
 
     sf::Image image;
@@ -53,6 +57,7 @@ auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
     g->setPlayer(*player);
     g->addChild(std::move(player));
     auto gen = buildGenerator();
+    g->setLevelGenerator(gen->getAs<LevelGenerator>());
     g->addChild(std::move(gen));
     g->addChild(std::move(buildRat()));
     g->initAllChildren(nullptr);

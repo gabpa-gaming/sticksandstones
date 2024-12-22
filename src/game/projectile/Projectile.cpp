@@ -31,5 +31,6 @@ auto Projectile::create(float x, float y, std::bitset<8> collisionMask, std::bit
     }
     damage = dmg;
     lifetime = life;
+
     return std::move(base);
 }

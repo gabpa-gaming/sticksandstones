@@ -6,21 +6,20 @@
 #include "HealthController.h"
 #include "SpriteEntity.h"
 #include "../Game.h"
+#include "../level/Interactible.h"
 #include "../level/LevelGenerator.h"
 #include "../player/PlayerController.h"
 #include "../level/Room.h"
 #include "../projectile/Projectile.h"
 
-[[deprecated]] auto Entity::IS_ROOT_FLAG() -> bool {
-    return false;
-}
+
 
 Entity::Entity() {
-    fmt::println("{} created", Entity::getName());
+    fmt::println("An entity was created", Entity::getName());
 }
 
 Entity::~Entity() {
-    fmt::println("{} deleted", Entity::getName());
+    fmt::println("An entity was deleted", Entity::getName());
 }
 
 auto Entity::getEnabled() -> bool {
@@ -64,7 +63,7 @@ auto Entity::getChildOfType() const -> E* { //returns the first one in hierarchy
     for (auto& child : children) {
         auto p = dynamic_cast<E*>(child.get());
         if (p) {
-            return p; // Found a child of type C
+            return p;
         }
     }
     return nullptr;
@@ -127,15 +126,6 @@ auto Entity::getInParents() -> E* {
     return parent->getInParents<E>();
 }
 
-auto Entity::isParentOf(const std::unique_ptr<Entity>& child) const -> bool {
-    for (auto &kid: children) {
-        if(kid == child) {
-            return true;
-        }
-    }
-    return false;
-}
-
 auto Entity::getHierarchy() const -> const std::string {
     std::string out = "\n";
     for(auto it = children.begin(); it != children.end(); it++) {
@@ -157,17 +147,10 @@ auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
     children.push_back(std::move(child));
 }
 
-auto Entity::getChild(int child_iter) -> std::unique_ptr<Entity>& {
-    if(child_iter >= children.size()) {
-        throw std::logic_error(fmt::format("Entity doesnt have at least {} children", child_iter+1));
-    }
-    return (children[child_iter]);
-}
-
 auto Entity::remove() -> void {
     int i = 0;
     for(; i < parent->children.size(); i++) {
-        if(parent->children[0].get() == this) break;
+        if(parent->children[i].get() == this) break;
     }
     parent->children.erase(parent->children.begin() + i);
 }
@@ -193,11 +176,13 @@ template auto Entity::getChildOfTypeRecursive<TickingEntity>() const -> TickingE
 template auto Entity::getChildOfTypeRecursive<HealthController>() const -> HealthController*;
 template auto Entity::getChildOfTypeRecursive<PlayerController>() const -> PlayerController*;
 template auto Entity::getChildOfTypeRecursive<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
+template auto Entity::getChildOfTypeRecursive<Interactor>() const -> Interactor*;
 
 template auto Entity::getChildOfType<TickingEntity>() const -> TickingEntity*;
 template auto Entity::getChildOfType<ControlledPhysicsEntity>() const -> ControlledPhysicsEntity*;
 template auto Entity::getChildOfType<PhysicsEntity>() const -> PhysicsEntity*;
 template auto Entity::getChildOfType<Projectile>() const -> Projectile*;
+template auto Entity::getChildOfType<Interactor>() const -> Interactor*;
 
 template auto Entity::getAs<Entity2D>() -> Entity2D&;
 template auto Entity::getAs<HealthController>() -> HealthController&;
@@ -206,5 +191,9 @@ template auto Entity::getAs<Room>() -> Room&;
 template auto Entity::getAs<LevelGenerator>() -> LevelGenerator&;
 template auto Entity::getAs<Projectile>() -> Projectile&;
 template auto Entity::getAs<TickingEntity>() -> TickingEntity&;
+template auto Entity::getAs<SpriteEntity>() -> SpriteEntity&;
+template auto Entity::getAs<Interactible>() -> Interactible&;
+template auto Entity::getAs<Interactor>() -> Interactor&;
+template auto Entity::getAs<CollidableEntity>() -> CollidableEntity&;
 
 template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;

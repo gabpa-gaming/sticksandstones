@@ -11,6 +11,7 @@
 #include "Builders.h"
 
 #include "entity/HealthController.h"
+#include "level/Interactible.h"
 #include "level/LevelGenerator.h"
 #include "level/Room.h"
 #include "projectile/Projectile.h"
@@ -45,7 +46,8 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
     auto ticker = (new TickingEntity)->create();
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("character"), 32, 32);
     auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-                                                           0, 0.5,1, 20, 0);
+                                                           CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy), 0.5,1, 20, 0, ticker.get());
+    auto interactor = (new Interactor)->create(0.5f);
     healthController->getAs<HealthController>().invTime = 0.5;
     auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
         caller.setStateByName(caller.getChildOfTypeRecursive<PlayerController>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
@@ -70,6 +72,7 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
 
     player->addChild(std::move(sprite));
     player->addChild(std::move(healthController));
+    player->addChild(std::move(interactor));
 
     player->getAs<ControlledPhysicsEntity>().speedGain = 1026;
     player->getAs<ControlledPhysicsEntity>().topSpeed = 150;
@@ -114,9 +117,9 @@ auto buildBat() -> std::unique_ptr<Entity> {
     bat -> addChild(std::move(sprite));
 
     auto health = (new HealthController)->create(0,0,
-        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::projectile),
-        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-        1,1, 20,5);
+         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::projectile),
+         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
+         1,1, 20,5, ticker.get());
     bat->addChild(std::move(health));
 
     ticker -> addChild(std::move(bat));
@@ -132,11 +135,11 @@ auto buildRat() -> std::unique_ptr<Entity> {
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("szizur"), 32, 32);
     auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
                                                            CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-                                                           0.5,1, 20, 4);
+                                                           0.5,1, 18, 4, ticker.get());
     healthController->getAs<HealthController>().invTime = 0;
     auto t = dynamic_cast<TickingEntity*>(ticker.get());
     t -> states =
-    {{0,50, 7, "damage",},
+    {{8,50, 7, "damage",},
     {0,7, 1, "walk", simpleMoveTowardsPlayer },
     {1,7, 1, "walk", simpleMoveTowardsPlayer},
     {2,7, 1, "walk", simpleMoveTowardsPlayer},
@@ -197,7 +200,7 @@ auto buildBaseProjectile(float damage, float speed, std::string name, float size
     projectile->getAs<ControlledPhysicsEntity>().direction = {static_cast<float>(orientation.x), static_cast<float>(orientation.y)};
 
     auto sprite = (new SpriteEntity)->create(x,y,texture,16,16, 1);
-
+    sprite->getAs<SpriteEntity>().rotate(atan2f(orientation.y, orientation.x) * 180 / std::numbers::pi);
     projectile->addChild(std::move(sprite));
 
     auto stateMachine = (new TickingEntity)->create();
@@ -206,6 +209,21 @@ auto buildBaseProjectile(float damage, float speed, std::string name, float size
     stateMachine->addChild(std::move(projectile));
 
     return std::move(stateMachine);
+}
+
+auto buildDoor(sf::Vector2i to, Room::RoomData::Entrance dir) -> std::unique_ptr<Entity> {
+    auto direction = rotate90NTimes({0, -1},dir);
+    sf::Vector2f pos = sf::Vector2f((direction.x * GAME_WIDTH_UNSCALED / 2.f + TILE_SIZE) * Game::PIXEL_SCALE,
+        (direction.y * GAME_HEIGHT_UNSCALED / 2.f + TILE_SIZE) * Game::PIXEL_SCALE);
+    auto sprite = (new SpriteEntity)->create(pos.x,pos.y, loadTxt("door") ,32, 32);
+    auto interactible = (new Interactible)->create(0.5f,
+        [to](Interactible &thing, Interactor &who) {
+            Game::getInstance()->getLevelGenerator().setRoom(to.x, to.y);
+            Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate(0,0);
+        }
+        );
+    interactible->addChild(std::move(sprite));
+    return interactible;
 }
 
 

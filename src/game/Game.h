@@ -9,15 +9,18 @@
 #include "entity/Entity.h"
 #include "entity/Entity2D.h"
 #include "entity/CollidableEntity.h"
+#include "level/LevelGenerator.h"
 #include "level/Room.h"
 #include "player/PlayerController.h"
 
+#define GAME_WIDTH_UNSCALED 192
+#define GAME_HEIGHT_UNSCALED 160
 
 class Game : public virtual Entity2D {
 
     static std::shared_ptr<Game> instance;
 
-    static bool debugModeOn;
+
 
     sf::Time lastPhysicsTick;
     sf::Time lastStateMachineTick;
@@ -26,9 +29,11 @@ class Game : public virtual Entity2D {
 
     Entity * player = nullptr;
 
+    LevelGenerator * levelGenerator = nullptr;
 
 
     public:
+    static bool debugModeOn;
 
     static float PIXEL_SCALE;
 
@@ -53,19 +58,21 @@ class Game : public virtual Entity2D {
 
     auto tickAll() const -> void;
 
-    auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
+    [[nodiscard]] auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
 
-    auto getPlayer() const -> Entity const&;
+    [[nodiscard]] auto getPlayer() const -> Entity &;
 
     auto setPlayer(Entity &p) -> void;
+
+    [[nodiscard]] auto getLevelGenerator() const -> LevelGenerator&;
+
+    auto setLevelGenerator(LevelGenerator &p) -> void;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
 
     static auto resetInstance() -> void;
 
 private:
-    auto IS_ROOT_FLAG() -> bool override;
-
     auto create() -> std::unique_ptr<Entity> override;
 
 };

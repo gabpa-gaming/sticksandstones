@@ -14,8 +14,9 @@
 #include "Builders.h"
 #include "entity/SpriteEntity.h"
 #include "entity/TickingEntity.h"
+#include "level/LevelGenerator.h"
 
-bool Game::debugModeOn = true;
+bool Game::debugModeOn = false;
 
 float Game::PIXEL_SCALE = 3;
 int Game::PHYSICS_TICK_RATE = 35;
@@ -31,7 +32,6 @@ auto Game::getInstance() -> std::shared_ptr<Game> {
 }
 
 auto Game::tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f {
-    const static int TILE_SIZE = 16;
     return {pos.x * PIXEL_SCALE * TILE_SIZE, pos.y * PIXEL_SCALE * TILE_SIZE};
 }
 
@@ -80,8 +80,10 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
 
 
         while(!toRemove.empty()) {
+            fmt::print("{}", getHierarchy());
             toRemove[0] -> remove();
             toRemove.erase(toRemove.begin());
+            fmt::print("{}", getHierarchy());
         }
 
         //fmt::print("{}", getHierarchy());
@@ -174,7 +176,7 @@ auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vecto
     return out;
 }
 
-auto Game::getPlayer() const -> Entity const& {
+auto Game::getPlayer() const -> Entity & {
     return *player;
 }
 
@@ -182,7 +184,11 @@ auto Game::setPlayer(Entity& p) -> void {
     player = &p;
 }
 
-bool Game::IS_ROOT_FLAG() {
-    return true;
+auto Game::getLevelGenerator() const -> LevelGenerator & {
+    return *levelGenerator;
+}
+
+auto Game::setLevelGenerator(LevelGenerator &p) -> void {
+    levelGenerator = &p;
 }
 

@@ -9,7 +9,10 @@
 #include "../entity/HealthController.h"
 #include "../entity/TickingEntity.h"
 #include "../entity/Entity.h"
+#include "../entity/SpriteEntity.h"
+#include "../level/Interactor.h"
 #include "../projectile/Projectile.h"
+#include "../level/LevelGenerator.h"
 
 auto PlayerController::physicsUpdate(float deltaT) -> void {
     direction = sf::Vector2f(0,0);
@@ -27,29 +30,40 @@ auto PlayerController::physicsUpdate(float deltaT) -> void {
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && canAttack) {
         canAttack = false;
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, 1})));
+        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, -1})));
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && canAttack) {
         canAttack = false;
+        getChildOfTypeRecursive<SpriteEntity>()->setFlipX(false);
         Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({1, 0})));
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && canAttack) {
         canAttack = false;
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, -1})));
+        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, 1})));
     }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && canAttack) {
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && canAttack) {
         canAttack = false;
+        getChildOfTypeRecursive<SpriteEntity>()->setFlipX(true);
         Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({-1, 0})));
     }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+        getChildOfTypeRecursive<Interactor>()->interactClosest();
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Grave)) {
+        Game::debugModeOn = !Game::debugModeOn;
+    }
+
     ControlledPhysicsEntity::physicsUpdate(deltaT);
 
 }
 
 auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity> {
+    auto displacement = range * sf::Vector2f{static_cast<float>(dir.x),static_cast<float>(dir.y)}*static_cast<float>(TILE_SIZE)*Game::PIXEL_SCALE;
     auto proj = buildBaseProjectile(4, 0,"attack",
         0.75f, 0.75f,
         loadTxt("attack"), attackSpeed,
-        this->parent->getChildOfTypeRecursive<HealthController>(), dir, getGlobalPos().x, getGlobalPos().y);
+        this->parent->getChildOfTypeRecursive<HealthController>(),
+        dir, getGlobalPos().x + displacement.x, getGlobalPos().y+displacement.y);
 
     proj->getChildOfType<Projectile>()->onDeath = [this](Projectile& ref) {
         this->canAttack = true;
@@ -63,6 +77,7 @@ auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<En
         nextState.spriteIndex += 1;
         stateMachine->states.push_back(nextState);
     }
+
     proj->initAllChildren(Game::getInstance()->currentRoom);
     return std::move(proj);
 }

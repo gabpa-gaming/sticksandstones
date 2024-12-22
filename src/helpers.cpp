@@ -20,6 +20,10 @@ auto magnitude(sf::Vector2f v) -> float {
     return std::sqrt(v.x * v.x + v.y * v.y);
 }
 
+auto dot(sf::Vector2f v1, sf::Vector2f v2) -> float {
+    return v1.x * v2.x + v1.y * v2.y;
+}
+
 auto normalize(sf::Vector2f v) -> sf::Vector2f {
     return v / magnitude(v);
 }

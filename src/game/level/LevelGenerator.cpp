@@ -34,23 +34,30 @@ auto LevelGenerator::setRoomToStart() -> void {
 
 auto LevelGenerator::setRoom(int x, int y) -> void {
     if(loadedRooms.contains({x,y})) {
-        loadedRooms[currentRoom]->setEnabled(false);
+        loadedRooms[currentRoomPos]->setEnabled(false);
         loadedRooms[{x,y}]->setEnabled(true);
-        currentRoom = {x,y};
+        currentRoomPos = {x,y};
         Game::getInstance()-> currentRoom = loadedRooms[{x,y}];
         return;
     }
-    if(currentRoom != sf::Vector2i{-1,-1}) {
-        loadedRooms[currentRoom]->setEnabled(false);
+    if(currentRoomPos != sf::Vector2i{-1,-1}) {
+        loadedRooms[currentRoomPos]->setEnabled(false);
     }
     auto room = buildRoom(*level[x][y]);
+
     auto roomPtr = room.get();
     addChild(std::move(room));
     loadedRooms[{x,y}] = &roomPtr->getAs<Room>();
     loadedRooms[{x,y}]-> initAllChildren(this);
     loadedRooms[{x,y}]-> spawnTiles();
+    for(int i = 0; i < 4; i++) {
+        if(loadedRooms[{x,y}] -> getAs<Room>().data->getEntrance(static_cast<Room::RoomData::Entrance>(i))) {
+            loadedRooms[{x,y}] -> addChild(buildDoor(rotate90NTimes({0,-1}, i) + sf::Vector2i{x,y}, static_cast<Room::RoomData::Entrance>(i)));
+        }
+    }
+    loadedRooms[{x,y}]-> initAllChildren(this);
     Game::getInstance()-> currentRoom = loadedRooms[{x,y}];
-    currentRoom = {x,y};
+    currentRoomPos = {x,y};
 
 }
 
@@ -197,6 +204,6 @@ auto LevelGenerator::findFarthestDeadEnd(const std::vector<sf::Vector2i>& deadEn
 auto LevelGenerator::create(unsigned long seed) -> std::unique_ptr<Entity> {
     auto base = Entity2D::create();
     this -> generationSeed = seed;
-    currentRoom = {-1,-1};
+    currentRoomPos = {-1,-1};
     return std::move(base);
 }

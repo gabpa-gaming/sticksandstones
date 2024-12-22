@@ -18,16 +18,28 @@ void SpriteEntity::setLocalPos(float x, float y) {
     setPosition(getGlobalPos().x, getGlobalPos().y);
 }
 
-auto SpriteEntity::setFlip(bool flip) -> void {
-    if(flip == this -> flip) {
+auto SpriteEntity::setFlipX(bool flip) -> void {
+    if(flip == this -> flipX) {
         return;
     }
-    this -> flip = flip;
+    this -> flipX = flip;
     setScale(abs(getScale().x) * (flip ? -1.0f : 1.0f), getScale().y);
 }
 
-auto SpriteEntity::getFlip() const -> bool {
-    return flip;
+auto SpriteEntity::getFlipX() const -> bool {
+    return flipX;
+}
+
+auto SpriteEntity::setFlipY(bool flip) -> void {
+    if(flip == this -> flipY) {
+        return;
+    }
+    this -> flipY = flip;
+    setScale(getScale().x, abs(getScale().y) * (flip ? -1.0f : 1.0f));
+}
+
+auto SpriteEntity::getFlipY() const -> bool {
+    return flipY;
 }
 
 /*

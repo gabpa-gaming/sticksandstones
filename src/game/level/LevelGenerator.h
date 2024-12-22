@@ -8,13 +8,13 @@
 #include "../entity/Entity2D.h"
 
 #define MAP_SIZE 35
+#define TILE_SIZE 16
 
 class LevelGenerator : public virtual Entity2D{
 
-    sf::Vector2i currentRoom;
+    sf::Vector2i currentRoomPos;
 
     Room::RoomData* level[35][35] = {};
-
 
     std::mt19937_64 rng;
 

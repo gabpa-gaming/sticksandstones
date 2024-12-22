@@ -12,8 +12,8 @@
 class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
 
     int width = 0, height = 0;
-    bool flip = false;
-
+    bool flipX = false;
+    bool flipY = false;
     public:
     int drawOrder = 0; //sprites with lower order will render under
 
@@ -21,8 +21,13 @@ class SpriteEntity : public virtual Entity2D, public virtual sf::Sprite {
     void draw(sf::RenderWindow* w) const;
     auto setGlobalPos(float x, float y) -> void override;
     auto setLocalPos(float x, float y) -> void override;
-    auto setFlip(bool flip) -> void;
-    auto getFlip() const -> bool;
+    auto setFlipX(bool flip) -> void;
+    auto getFlipX() const -> bool;
+
+    auto setFlipY(bool flip) -> void;
+
+    auto getFlipY() const -> bool;
+
     //auto create() -> std::unique_ptr<Entity> override;
     //auto create(float localX, float localY) -> std::unique_ptr<Entity> override;
     auto virtual create(float localX, float localY, std::shared_ptr<sf::Texture>const& txt, int width, int height, int drawOrder=0) -> std::unique_ptr<Entity>;

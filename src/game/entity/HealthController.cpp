@@ -7,6 +7,12 @@
 #include "TickingEntity.h"
 
 
+auto HealthController::onDeath() -> void {
+    onDeathEvent(*this);
+    if(topParentRef) topParentRef->endOfFrameRemove();
+}
+
+
 void HealthController::init(Entity* parent) {
     CollidableEntity::init(parent);
     stateMachine = getInParents<TickingEntity>();
@@ -15,12 +21,11 @@ void HealthController::init(Entity* parent) {
 void HealthController::onCollision(CollidableEntity *other) {
     CollidableEntity::onCollision(other);
     if(auto p = dynamic_cast<HealthController*>(other)) {
-        takeDamage(p->contactDamage);
+        p -> takeDamage(contactDamage);
     }
 }
 
 auto HealthController::takeDamage(float amount) -> void {
-
     if(amount == 0) {
         return;
     }
@@ -32,13 +37,17 @@ auto HealthController::takeDamage(float amount) -> void {
     if(stateMachine && amount) {
         stateMachine->setStateByName("damage");
     }
-    fmt::println("{} took {} dmg", getName() ,amount);
+    fmt::println("{} took {} dmg, new health: {}", getName() ,amount, health);
+    if(health <= 0) {
+        onDeath();
+    }
 }
 
 
 std::unique_ptr<Entity> HealthController::create(float x, float y, std::bitset<8> collisionMask,
-    std::bitset<8> collidesWith, float width, float height, float hp,float contactDmg = 0) {
+    std::bitset<8> collidesWith, float width, float height, float hp,float contactDmg = 0, Entity* topParent = nullptr) {
     health = hp;
     contactDamage = contactDmg;
+    topParentRef = topParent;
     return CollidableEntity::create(x, y, collisionMask, collidesWith, width, height);
 }

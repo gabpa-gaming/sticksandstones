@@ -11,6 +11,7 @@
 #include "entity/CollidableEntity.h"
 #include "entity/TickingEntity.h"
 
+//compose more complex entities from simpler components
 
 auto buildPlayer() -> std::unique_ptr<Entity>;
 auto buildBat() -> std::unique_ptr<Entity>;
@@ -21,6 +22,9 @@ auto buildGenerator() -> std::unique_ptr<Entity>;
 auto buildBaseProjectile(float damage, float speed, std::string name, float sizeX, float sizeY,
     const std::shared_ptr<sf::Texture>& texture, float life, CollidableEntity *ignore,
     sf::Vector2i orientation, float x, float y) -> std::unique_ptr<Entity>;
+auto buildDoor(sf::Vector2i to, Room::RoomData::Entrance dir) -> std::unique_ptr<Entity>;
+
+
 
 auto simpleMoveTowardsPlayer(TickingEntity& caller, TickingEntity::StateMachineState&) -> void;
 auto projectileLifetimeCounter(TickingEntity& caller, TickingEntity::StateMachineState&) -> void;

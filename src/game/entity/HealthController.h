@@ -10,15 +10,23 @@
 
 
 class HealthController : public virtual CollidableEntity {
+
     float health = 20;
 
     TickingEntity* stateMachine = nullptr;
 
     sf::Clock clock;
-    public:
+public:
+
+    Entity * topParentRef = nullptr; //on death will be removed from hierarchy
+
+    std::function<void(Entity&)> onDeathEvent = [&](Entity& e) {};
+
     float invTime = 0.f;
 
     float contactDamage = 0;
+
+    auto onDeath() -> void;
 
     auto init(Entity * parent) -> void override;
 
@@ -30,7 +38,7 @@ class HealthController : public virtual CollidableEntity {
 
 
     auto virtual create(float x, float y, std::bitset<8> collisionMask, std::bitset<8> collidesWith, float width, float height, float hp, float
-                        contactDmg) -> std::unique_ptr<Entity>;
+                        contactDmg, Entity *topParent) -> std::unique_ptr<Entity>;
 
 };
 

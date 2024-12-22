@@ -26,6 +26,7 @@ public:
         item,
         destructible,
         projectile,
+        interactible
     };
 
     static int getAsBitMask(ColliderType type);

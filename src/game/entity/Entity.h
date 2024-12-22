@@ -7,15 +7,15 @@
 
 #include "../../headers.h"
 
-class Entity { //oh, the misery everybody wants to be my entity
+class Entity { //based on hierarchy systems in game engines like godot
 
 protected:
     int id = -1;
     std::vector<std::unique_ptr<Entity>> children;
 
-    bool initialized = false;
+    bool initialized = false; //all entities should get initialized using init(parent) after creation to set references to other entities in hierarchy
     Entity* parent = nullptr;
-    bool enabled = true;
+    bool enabled = true; //game loop won't iterate over disabled entities
 
 public:
 
@@ -25,16 +25,14 @@ public:
 
     auto setEnabled(bool enabled) -> void;
 
-    auto virtual init(Entity * parent) -> void;
+    auto virtual init(Entity * parent) -> void; //set parent and sibling references before adding to hierarchy
 
-    auto initAllChildren(Entity* parent) -> void;
+    auto initAllChildren(Entity* parent) -> void; //same as init but also recursively for all children
 
     template<typename E>
-    auto getAs()  -> E &;
+    auto getAs() -> E&;
 
     [[nodiscard]] auto getId() const -> int;
-
-    [[nodiscard]] auto isParentOf(const std::unique_ptr<Entity> &child) const -> bool;
 
     auto virtual addChild(std::unique_ptr<Entity> child) -> void;
 
@@ -54,21 +52,15 @@ public:
     template<class E>
     [[nodiscard]] auto getAllChildrenOfTypeRecursive() const -> std::vector<Entity *>;
 
-    [[nodiscard]] auto getChild(int child_iter) -> std::unique_ptr<Entity>&;
-
     template<typename E>
     [[nodiscard]] auto getInParents() -> E*;
 
-    virtual auto remove() -> void;
+    virtual auto remove() -> void; //only use outside of loops, use endOfFrameRemove() instead for safe removal
 
     auto endOfFrameRemove() -> void;
 
-    virtual auto create() -> std::unique_ptr<Entity>;
+    virtual auto create() -> std::unique_ptr<Entity>; //factory function used to set base values and prepare entity to be added to hierarchy
 
-private:
-
-    virtual auto IS_ROOT_FLAG() -> bool;
-public:
     Entity();
 
     virtual ~Entity();

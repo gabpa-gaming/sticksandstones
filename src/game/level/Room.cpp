@@ -102,7 +102,6 @@ Room::RoomData::RoomData(std::string const& dataStr) {
 
 auto Room::spawnTiles() -> void {
     assert(data);
-    const float TILE_SIZE = 16;
     for(int x = 0; x < 10; x++)
         for(int y = 0; y < 8; y++) {
             std::unique_ptr<Entity> entity;

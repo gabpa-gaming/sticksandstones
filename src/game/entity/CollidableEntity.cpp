@@ -20,8 +20,9 @@ auto CollidableEntity::setGlobalPos(float x, float y) -> void {
         - sf::Vector2f(width,height) * Game::PIXEL_SCALE * 8.f,
         Game::tilePosToScreenCoords({width, height}));
     auto col = checkPosForCollisons();
-    if(!col.empty()) {
+    while(!col.empty()) {
         col[0]->onCollision(this);
+        col.erase(col.begin());
     }
 }
 

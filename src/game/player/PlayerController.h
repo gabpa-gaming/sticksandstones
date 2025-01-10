@@ -8,15 +8,17 @@
 #include "../entity/TickingEntity.h"
 #include "../entity/ControlledPhysicsEntity.h"
 
-class Projectile;
-
 class PlayerController : public virtual ControlledPhysicsEntity {
 
     bool canAttack = true;
 
+    sf::Clock interactClock;
+    float interactTime = 0.25f;
+
 public:
     float attackSpeed = 0.5f;
     float range = 0.65f;
+    float damage = 2.75f;
     auto physicsUpdate(float deltaT) -> void override;
 
     auto buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity>;

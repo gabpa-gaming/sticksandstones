@@ -15,11 +15,11 @@
 
 
 Entity::Entity() {
-    fmt::println("An entity was created", Entity::getName());
+    //fmt::println("An entity was created", Entity::getName());
 }
 
 Entity::~Entity() {
-    fmt::println("An entity was deleted", Entity::getName());
+    //fmt::println("An entity was deleted", Entity::getName());
 }
 
 auto Entity::getEnabled() -> bool {
@@ -195,5 +195,7 @@ template auto Entity::getAs<SpriteEntity>() -> SpriteEntity&;
 template auto Entity::getAs<Interactible>() -> Interactible&;
 template auto Entity::getAs<Interactor>() -> Interactor&;
 template auto Entity::getAs<CollidableEntity>() -> CollidableEntity&;
+template auto Entity::getAs<PlayerUI>() -> PlayerUI&;
 
 template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;
+template auto Entity::getInParents<PlayerController>() -> PlayerController*;

@@ -22,22 +22,22 @@ auto Room::RoomData::setFromString(std::string const& str)-> void {
                 break;
             case 'r':
                 entrances[right] = true;
-            break;
+                break;
             case 'b':
                 entrances[down] = true;
-            break;
+                break;
             case 'l':
                 entrances[left] = true;
-            break;
+                break;
             case 'I':
                 type = item;
-            break;
+                break;
             case 'S':
                 type = starting;
-            break;
+                break;
             case 'B':
                 type = boss;
-            break;
+                break;
             default:
                 break;
         }
@@ -102,19 +102,54 @@ Room::RoomData::RoomData(std::string const& dataStr) {
 
 auto Room::spawnTiles() -> void {
     assert(data);
+    const std::vector<std::string> possibilities = {"rock", "rock", "stick", "smallPot"};
+
     for(int x = 0; x < 10; x++)
         for(int y = 0; y < 8; y++) {
             std::unique_ptr<Entity> entity;
             switch(data->getTile(x,y)) {
-                case '1': //rock
+                case '2': // rock 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case '1': // rock
                     entity = buildRock();
                 break;
-                case 'b': //bat
+                case 'b': // bat 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'B': // bat
                     entity = buildBat();
+                break;
+                case 'r': // rat 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'R': // rat
+                    entity = buildRat();
+                break;
+                case 'e': // ementerror 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'E': // ementerror
+                    entity = buildEmenterror();
+                break;
+                case 'i': // common item 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'I': // common item
+                    {
+                        auto name = possibilities[Game::getInstance()->miscRNG() % possibilities.size()];
+                        entity = buildItemObject(ItemData::getItemData(name), {0,0});
+                    }
                 break;
                 default:
                     continue;
             }
+
             entity->getAs<Entity2D>().setGlobalPos((x + 1.5f) * TILE_SIZE * Game::PIXEL_SCALE, (y + 1.5f) * TILE_SIZE * Game::PIXEL_SCALE);
             entity->initAllChildren(this);
             addChild(std::move(entity));

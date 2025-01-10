@@ -33,7 +33,7 @@ auto simpleMoveTowardsPlayer(TickingEntity& caller, TickingEntity::StateMachineS
 }
 auto projectileLifetimeCounter(TickingEntity& caller, TickingEntity::StateMachineState&) -> void {
     auto proj = caller.getChildOfType<Projectile>();
-    //fmt::println("{}", Game::getInstance()->getHierarchy());
+    caller.dislocate(0,0); //to update collision
     proj->lifetime -= 1.f/Game::STATE_MACHINE_TICK_RATE;
     if(proj->lifetime <= 0)
         proj->kill();
@@ -46,14 +46,18 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
     auto ticker = (new TickingEntity)->create();
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("character"), 32, 32);
     auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-                                                           CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy), 0.5,1, 20, 0, ticker.get());
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+        0.5,1, 20, 0, nullptr);
     auto interactor = (new Interactor)->create(0.5f);
     healthController->getAs<HealthController>().invTime = 0.5;
+    healthController->getAs<HealthController>().onDeathEvent = [](Entity& caller) {
+        caller.getInParents<TickingEntity>()->setStateByName("dead");
+    };
+
     auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
         caller.setStateByName(caller.getChildOfTypeRecursive<PlayerController>() -> velocity != sf::Vector2f(0,0) ? "walk" : "idle");
     };
-    auto t = dynamic_cast<TickingEntity*>(ticker.get());
-        t -> states =
+    static std::vector<TickingEntity::StateMachineState> states =
         {{13,50, 1, "damage", blinker},
         {0,20,1, "idle", stateChanger},
         {1,10,1, "idle", stateChanger},
@@ -67,7 +71,10 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
         {9,7, 1, "walk", stateChanger},
         {10,7, 1, "walk", stateChanger},
         {11,7, -6, "walk", stateChanger},
+        {12,1, 0, "dead"}
         };
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+        t -> states = states;
     t -> setStateByName("idle");
 
     player->addChild(std::move(sprite));
@@ -76,7 +83,7 @@ auto buildPlayer() -> std::unique_ptr<Entity> {
 
     player->getAs<ControlledPhysicsEntity>().speedGain = 1026;
     player->getAs<ControlledPhysicsEntity>().topSpeed = 150;
-    player->getAs<ControlledPhysicsEntity>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    player->getAs<ControlledPhysicsEntity>().setGlobalPos(GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE/2,GAME_HEIGHT_UNSCALED *Game::PIXEL_SCALE/2);
     player->getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
 
     ticker -> addChild(std::move(player));
@@ -88,42 +95,43 @@ auto buildBat() -> std::unique_ptr<Entity> {
     auto bat = (new ControlledPhysicsEntity)->create(0,0,
         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy), 0, 0.25, 0.25);
     auto ticker = (new TickingEntity)->create();
-    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("bat"), 16, 16);
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("bat"), 16, 16, 3);
 
-    auto stateChanger = [](TickingEntity& caller, TickingEntity::StateMachineState&) {
-        caller.setStateByName(caller.getChildOfType<PhysicsEntity>() -> velocity != sf::Vector2f(0,0) ? "sleep" : "fly");
-    };
-    std::vector<TickingEntity::StateMachineState> states =
-    {{5,10,0, "damage"},
-    {5,1,0, "sleep", stateChanger},
-    {0,5,1, "fly", stateChanger},
-    {1,5,1, "fly", stateChanger},
-    {2,5,1, "fly", stateChanger},
-    {3,5,1, "fly", stateChanger},
-    {4,5,1, "fly", stateChanger},
-    {3,5,1, "fly", stateChanger},
-    {2,5,1, "fly", stateChanger},
-    {1,5,-7, "fly", stateChanger},
+    auto extraRandomLength = [](TickingEntity &caller, TickingEntity::StateMachineState &state) {
+        caller.tickCounter -= Game::getInstance()->miscRNG() % 225;
     };
 
-    auto t = dynamic_cast<TickingEntity*>(ticker.get());
-    t -> states = states;
-    t -> setStateByName("fly");
-
-    bat-> getAs<ControlledPhysicsEntity>().speedGain = 1026;
-    bat-> getAs<ControlledPhysicsEntity>().topSpeed = 150;
-    bat -> getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
+    static std::vector<TickingEntity::StateMachineState> states =
+    {{6,20,2, "damage"},
+    {0,5,1, "walk", simpleMoveTowardsPlayer},
+    {1,5,1, "walk", simpleMoveTowardsPlayer},
+    {2,5,1, "walk", simpleMoveTowardsPlayer},
+    {3,5,1, "walk", simpleMoveTowardsPlayer},
+    {4,5,1, "walk", simpleMoveTowardsPlayer},
+    {3,5,1, "walk", simpleMoveTowardsPlayer},
+    {2,5,1, "walk", simpleMoveTowardsPlayer},
+    {1,5,-7, "walk", simpleMoveTowardsPlayer},
+    {5,75,-8, "idle", [](TickingEntity &, TickingEntity::StateMachineState &)->void{}, extraRandomLength}
+    };
 
     bat -> addChild(std::move(sprite));
 
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+    t -> states = states;
+
+
+    bat-> getAs<ControlledPhysicsEntity>().speedGain = 200;
+    bat-> getAs<ControlledPhysicsEntity>().topSpeed = 120;
+    bat -> getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
+
     auto health = (new HealthController)->create(0,0,
-         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::projectile),
+         CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
          CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
-         1,1, 20,5, ticker.get());
+         0.5f,0.5f, 25,5, ticker.get());
     bat->addChild(std::move(health));
 
     ticker -> addChild(std::move(bat));
-
+    t -> setStateByName("idle");
     return std::move(ticker);
 }
 
@@ -138,17 +146,19 @@ auto buildRat() -> std::unique_ptr<Entity> {
                                                            0.5,1, 18, 4, ticker.get());
     healthController->getAs<HealthController>().invTime = 0;
     auto t = dynamic_cast<TickingEntity*>(ticker.get());
-    t -> states =
-    {{8,50, 7, "damage",},
-    {0,7, 1, "walk", simpleMoveTowardsPlayer },
-    {1,7, 1, "walk", simpleMoveTowardsPlayer},
-    {2,7, 1, "walk", simpleMoveTowardsPlayer},
-    {3,7, 1, "walk", simpleMoveTowardsPlayer},
-    {4,7, 1, "walk", simpleMoveTowardsPlayer},
-    {5,7, 1, "walk", simpleMoveTowardsPlayer},
-    {6,7, -6, "walk", simpleMoveTowardsPlayer},
-{7,7, -7, "walk", simpleMoveTowardsPlayer},
+
+    static std::vector<TickingEntity::StateMachineState> states =
+        {{8,50, 7, "damage",},
+        {0,7, 1, "walk", simpleMoveTowardsPlayer },
+        {1,7, 1, "walk", simpleMoveTowardsPlayer},
+        {2,7, 1, "walk", simpleMoveTowardsPlayer},
+        {3,7, 1, "walk", simpleMoveTowardsPlayer},
+        {4,7, 1, "walk", simpleMoveTowardsPlayer},
+        {5,7, 1, "walk", simpleMoveTowardsPlayer},
+        {6,7, 1, "walk", simpleMoveTowardsPlayer},
+        {7,7, -7, "walk", simpleMoveTowardsPlayer},
     };
+    t -> states = states;
     t -> setStateByName("walk");
 
     rat->addChild(std::move(sprite));
@@ -156,10 +166,49 @@ auto buildRat() -> std::unique_ptr<Entity> {
 
     rat->getAs<ControlledPhysicsEntity>().speedGain = 450;
     rat->getAs<ControlledPhysicsEntity>().topSpeed = 165;
-    rat->getAs<ControlledPhysicsEntity>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    //rat->getAs<ControlledPhysicsEntity>().setGlobalPos(GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE/2,GAME_HEIGHT_UNSCALED *Game::PIXEL_SCALE/2);
     rat->getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
 
     ticker -> addChild(std::move(rat));
+
+    return std::move(ticker);
+}
+
+auto buildEmenterror() -> std::unique_ptr<Entity> {
+    auto ementerror = (new ControlledPhysicsEntity)->create(0,0,
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+        CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::wall), 0.25, 0.25);
+    auto ticker = (new TickingEntity)->create();
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("emmenterror"), 32, 32);
+    auto healthController = (new HealthController)->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::enemy),
+                                                           CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::player),
+                                                           0.5,1, 42, 4, ticker.get());
+    healthController->getAs<HealthController>().invTime = 0;
+    auto t = dynamic_cast<TickingEntity*>(ticker.get());
+
+    static std::vector<TickingEntity::StateMachineState>states = {
+        {0,50, 1, "damage",},
+        {0,12, 1, "walk", simpleMoveTowardsPlayer },
+        {1,12, 1, "walk", simpleMoveTowardsPlayer},
+        {2,12, 1, "walk", simpleMoveTowardsPlayer},
+        {3,12, 1, "walk", simpleMoveTowardsPlayer},
+        {4,12, 1, "walk", simpleMoveTowardsPlayer},
+        {5,12, 1, "walk", simpleMoveTowardsPlayer},
+        {6,12, 1, "walk", simpleMoveTowardsPlayer},
+        {7,12, -7, "walk", simpleMoveTowardsPlayer},
+    };
+    t -> states = states;
+    t -> setStateByName("walk");
+
+    ementerror->addChild(std::move(sprite));
+    ementerror->addChild(std::move(healthController));
+
+    ementerror->getAs<ControlledPhysicsEntity>().speedGain = 450;
+    ementerror->getAs<ControlledPhysicsEntity>().topSpeed = 50;
+    //ementerror->getAs<ControlledPhysicsEntity>().setGlobalPos(GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE/2,GAME_HEIGHT_UNSCALED *Game::PIXEL_SCALE/2);
+    ementerror->getAs<ControlledPhysicsEntity>().colliderOffset = sf::Vector2f(0, 0.35);
+
+    ticker -> addChild(std::move(ementerror));
 
     return std::move(ticker);
 }
@@ -170,14 +219,16 @@ auto buildRock() -> std::unique_ptr<Entity> {
                     + CollidableEntity::getAsBitMask(CollidableEntity::ColliderType::destructible),
 0, 1, 1);
     auto sprite = (new SpriteEntity)->create(0,0, loadTxt("tileset") ,16, 16);
-
+    if(Game::getInstance()->miscRNG() % 2 == 0) {
+        sprite->getAs<SpriteEntity>().setSpriteIndex(1);
+    }
     rock->addChild(std::move(sprite));
     return std::move(rock);
 }
 
 auto buildRoom(Room::RoomData& data) -> std::unique_ptr<Entity> {
     auto room = (new Room)->create(data);
-    room->getAs<Entity2D>().setGlobalPos(192 * Game::PIXEL_SCALE/2,160 *Game::PIXEL_SCALE/2);
+    room->getAs<Entity2D>().setGlobalPos(GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE/2,GAME_HEIGHT_UNSCALED *Game::PIXEL_SCALE/2);
     return std::move(room);
 }
 
@@ -212,18 +263,55 @@ auto buildBaseProjectile(float damage, float speed, std::string name, float size
 }
 
 auto buildDoor(sf::Vector2i to, Room::RoomData::Entrance dir) -> std::unique_ptr<Entity> {
-    auto direction = rotate90NTimes({0, -1},dir);
-    sf::Vector2f pos = sf::Vector2f((direction.x * GAME_WIDTH_UNSCALED / 2.f + TILE_SIZE) * Game::PIXEL_SCALE,
-        (direction.y * GAME_HEIGHT_UNSCALED / 2.f + TILE_SIZE) * Game::PIXEL_SCALE);
-    auto sprite = (new SpriteEntity)->create(pos.x,pos.y, loadTxt("door") ,32, 32);
-    auto interactible = (new Interactible)->create(0.5f,
-        [to](Interactible &thing, Interactor &who) {
+    sf::Vector2f pos;
+    switch(dir) {
+        case 0: pos = sf::Vector2f(GAME_WIDTH_UNSCALED / 2.f, TILE_SIZE*0.75f) * Game::PIXEL_SCALE;
+            break;
+        case 1: pos = sf::Vector2f(GAME_WIDTH_UNSCALED - TILE_SIZE*0.75f,GAME_HEIGHT_UNSCALED/2.f) * Game::PIXEL_SCALE;
+            break;
+        case 2: pos = sf::Vector2f(GAME_WIDTH_UNSCALED / 2.f, -TILE_SIZE*0.75f + GAME_HEIGHT_UNSCALED) * Game::PIXEL_SCALE;
+            break;
+        case 3: pos = sf::Vector2f(TILE_SIZE*0.75f,GAME_HEIGHT_UNSCALED/2.f) * Game::PIXEL_SCALE;
+            break;
+    }
+    auto sprite = (new SpriteEntity)->create(0,0, loadTxt("door"),32, 32,-1);
+    sprite->getAs<SpriteEntity>().rotate(dir*90);
+    auto interactible = (new Interactible)->create(1.25f,
+        [to,pos,dir](Interactible &thing, Interactor &who) {
             Game::getInstance()->getLevelGenerator().setRoom(to.x, to.y);
-            Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate(0,0);
+            switch(dir) {
+        case 0: Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate(0, (GAME_HEIGHT_UNSCALED - TILE_SIZE*3.25f)*Game::PIXEL_SCALE);
+            break;
+        case 1: Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate(-(GAME_WIDTH_UNSCALED - TILE_SIZE*3.25f)*Game::PIXEL_SCALE, 0);
+            break;
+        case 2: Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate(0, -(GAME_HEIGHT_UNSCALED - TILE_SIZE*3.25f)*Game::PIXEL_SCALE);
+            break;
+        case 3: Game::getInstance()->getPlayer().getAs<Entity2D>().dislocate((GAME_WIDTH_UNSCALED - TILE_SIZE*3.25f)*Game::PIXEL_SCALE, 0);
+            break;
         }
-        );
+    });
     interactible->addChild(std::move(sprite));
+    interactible->getAs<Entity2D>().setGlobalPos(pos.x,pos.y);
+    fmt::print("{}",Game::getInstance()->getHierarchy());
     return interactible;
+}
+
+auto buildItemObject(ItemData& data, sf::Vector2f at)-> std::unique_ptr<Entity> {
+    auto sprite = (new SpriteEntity)->create(at.x, at.y, loadTxt(data.name), 16, 16, -1);
+    auto interactible = (new Interactible)->create(0.5f,
+        [itemData = &data](Interactible &thing, Interactor &who)->  void {
+            if(itemData->useOnPickup) {
+                itemData->onUse(*itemData, thing.getGlobalPos(), sf::Vector2i(0,0), who);
+                thing.endOfFrameRemove();
+            }
+            else if(who.addItem(*itemData)) {
+                thing.endOfFrameRemove();
+            }
+        }
+    );
+    interactible->getAs<Entity2D>().setGlobalPos(at.x,at.y);
+    interactible->addChild(std::move(sprite));
+    return std::move(interactible);
 }
 
 

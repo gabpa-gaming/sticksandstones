@@ -15,10 +15,11 @@
 #include <optional>
 #include <bitset>
 #include <functional>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <ranges>
 #include <random>
+#include <memory>
 
 #include "fmt/xchar.h"
 #include "SFML/Graphics.hpp"

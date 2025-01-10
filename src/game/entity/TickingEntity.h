@@ -8,7 +8,7 @@
 #include "Entity2D.h"
 #include "../../headers.h"
 
-class TickingEntity : public virtual Entity2D { //loosely inspired by state machine system in doom
+class TickingEntity : public virtual Entity2D { //acts like a state machine for entities
 
 public:
     int tickCounter = 0;
@@ -35,6 +35,7 @@ public:
     auto setState(int n) -> void;
 
     auto setStateByName(const std::string &stateName) -> bool;
+    [[nodiscard]] auto isCurrentState(std::string name) const -> bool;
 };
 
 

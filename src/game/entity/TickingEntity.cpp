@@ -15,7 +15,6 @@ auto TickingEntity::stateMachineTick() -> void {
     if(tickCounter >= states[currentState].tickLength) {
         tickCounter -= states[currentState].tickLength;
         setState(currentState+states[currentState].nextStateOffset);
-        return;
     }
     states[currentState].perTick(*this, states[currentState]);
 }
@@ -33,6 +32,9 @@ auto TickingEntity::setState(const int n) -> void {
     if(currentState >= states.size()) {
         setState(n-(states.size()));
     }
+    if(currentState < 0) {
+        setState(n+(states.size()));
+    }
     states[currentState].startOfState(*this, states[currentState]);
 }
 
@@ -47,4 +49,8 @@ auto TickingEntity::setStateByName(const std::string &stateName) -> bool {
         }
     }
     return false;
+}
+
+auto TickingEntity::isCurrentState(std::string name) const -> bool {
+    return states[currentState].stateName == name;
 }

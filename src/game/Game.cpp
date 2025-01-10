@@ -14,6 +14,7 @@
 #include "Builders.h"
 #include "entity/SpriteEntity.h"
 #include "entity/TickingEntity.h"
+#include "level/Interactor.h"
 #include "level/LevelGenerator.h"
 
 bool Game::debugModeOn = false;
@@ -31,6 +32,39 @@ auto Game::getInstance() -> std::shared_ptr<Game> {
     return instance;
 }
 
+auto Game::initGame() -> void {
+    auto bgr = (new SpriteEntity())->create(288,240, loadTxt("bgr") ,192, 160,-5);
+    auto wallColliderR = (new CollidableEntity())->create((GAME_WIDTH_UNSCALED)* Game::PIXEL_SCALE,0,
+        CollidableEntity::getAsBitMask(CollidableEntity::wall),0,
+        2, 20);
+    auto wallColliderL = (new CollidableEntity())->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::wall),0,
+        2, 20);
+    auto wallColliderT = (new CollidableEntity())->create(0,0, CollidableEntity::getAsBitMask(CollidableEntity::wall),0,
+        24, 2);
+    auto wallColliderB = (new CollidableEntity())->create(0,(GAME_HEIGHT_UNSCALED) * Game::PIXEL_SCALE,
+        CollidableEntity::getAsBitMask(CollidableEntity::wall),0,
+        24, 2);
+
+    addChild(std::move(wallColliderB));
+    addChild(std::move(wallColliderR));
+    addChild(std::move(wallColliderL));
+    addChild(std::move(wallColliderT));
+
+    addChild(std::move(bgr));
+    auto player = buildPlayer();
+    setPlayer(*player);
+    addChild(std::move(player));
+    auto gen = buildGenerator();
+    setLevelGenerator(gen->getAs<LevelGenerator>());
+    addChild(std::move(gen));
+    initAllChildren(nullptr);
+
+    auto playerUI = (new PlayerUI)->create();
+    setPlayerUI(std::move(playerUI));
+    fmt::println("Game initialized");
+    fmt::println("{}", getHierarchy());
+}
+
 auto Game::tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f {
     return {pos.x * PIXEL_SCALE * TILE_SIZE, pos.y * PIXEL_SCALE * TILE_SIZE};
 }
@@ -38,19 +72,23 @@ auto Game::tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f {
 auto Game::resetInstance() -> void{
     std::shared_ptr<Entity> ptr = std::move((new Game)->create());
     instance = std::dynamic_pointer_cast<Game>(ptr);
+    std::random_device device;
+    instance->miscRNG.seed(device());
+    instance->initGame();
 }
 
 std::unique_ptr<Entity> Game::create() {
     return std::move(Entity2D::create());
 }
 
-auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
+auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> bool {
     gameClock.restart();
-    sf::Clock frameCounter;
+    //sf::Clock frameCounter;
     float lastFrameTime = 60;
     float fps;
     lastPhysicsTick = gameClock.getElapsedTime();
-
+    window->setKeyRepeatEnabled(false);
+    window->setFramerateLimit(600);
     while (window -> isOpen())
     {
         // check all the window's events that were triggered since the last iteration of the loop
@@ -61,6 +99,20 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
             // "close requested" event: we close the window
             if (event.type == sf::Event::Closed)
                 window -> close();
+            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                rPressed = true;
+                rKeyPressedClock.restart();
+            }
+            if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::R) {
+                rKeyPressedClock.restart();
+                rPressed = false;
+            }
+            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::LControl) {
+                player->getChildOfTypeRecursive<Interactor>()->cycleItems();
+            }
+        }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::R) && rKeyPressedClock.getElapsedTime().asSeconds() > 1.f && rPressed) {
+            restartGame = true;
         }
         window -> clear(sf::Color(85, 85, 85));
 
@@ -79,16 +131,18 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
         frameUpdateAll((gameClock.getElapsedTime() - lastFrame).asSeconds());
 
 
+
         while(!toRemove.empty()) {
-            fmt::print("{}", getHierarchy());
+            //fmt::print("{}", getHierarchy());
             toRemove[0] -> remove();
             toRemove.erase(toRemove.begin());
-            fmt::print("{}", getHierarchy());
+            //fmt::print("{}", getHierarchy());
         }
 
         //fmt::print("{}", getHierarchy());
 
         drawFrame(window);
+        playerUI->draw(*window);
 
         window -> display();
         lastFrame = gameClock.getElapsedTime();
@@ -96,8 +150,14 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> void {
         fps = (1.f / (currentTime - lastFrameTime)+fps)/2;
         lastFrameTime = currentTime;
         //fmt::print("FPS : {}\n", fps);
+
+        if(restartGame) {
+            restartGame = false;
+            return true;
+        }
     }
     fmt::println("Game closed.");
+    return false;
 }
 
 auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void {
@@ -182,6 +242,11 @@ auto Game::getPlayer() const -> Entity & {
 
 auto Game::setPlayer(Entity& p) -> void {
     player = &p;
+}
+
+auto Game::setPlayerUI(std::unique_ptr<Entity> ui) -> void {
+    playerUI = &ui->getAs<PlayerUI>();
+    addChild(std::move(ui));
 }
 
 auto Game::getLevelGenerator() const -> LevelGenerator & {

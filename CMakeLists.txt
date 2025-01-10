@@ -58,6 +58,10 @@ add_executable(main src/main.cpp
         src/game/level/Interactor.h
         src/game/projectile/Projectile.cpp
         src/game/projectile/Projectile.h
+        src/game/item/ItemData.cpp
+        src/game/item/ItemData.h
+        src/game/player/PlayerUI.cpp
+        src/game/player/PlayerUI.h
 )
 target_link_libraries(main PRIVATE sfml-graphics fmt)
 target_compile_features(main PRIVATE cxx_std_20)

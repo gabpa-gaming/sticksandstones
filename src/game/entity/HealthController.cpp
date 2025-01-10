@@ -8,6 +8,7 @@
 
 
 auto HealthController::onDeath() -> void {
+    dead = true;
     onDeathEvent(*this);
     if(topParentRef) topParentRef->endOfFrameRemove();
 }
@@ -26,7 +27,7 @@ void HealthController::onCollision(CollidableEntity *other) {
 }
 
 auto HealthController::takeDamage(float amount) -> void {
-    if(amount == 0) {
+    if(amount == 0 || dead) {
         return;
     }
     if(clock.getElapsedTime().asSeconds() < invTime) {
@@ -43,9 +44,16 @@ auto HealthController::takeDamage(float amount) -> void {
     }
 }
 
+auto HealthController::getHealth() -> float {
+    return health;
+}
+
+auto HealthController::isDead() -> bool {
+    return dead;
+}
 
 std::unique_ptr<Entity> HealthController::create(float x, float y, std::bitset<8> collisionMask,
-    std::bitset<8> collidesWith, float width, float height, float hp,float contactDmg = 0, Entity* topParent = nullptr) {
+                                                 std::bitset<8> collidesWith, float width, float height, float hp,float contactDmg = 0, Entity* topParent = nullptr) {
     health = hp;
     contactDamage = contactDmg;
     topParentRef = topParent;

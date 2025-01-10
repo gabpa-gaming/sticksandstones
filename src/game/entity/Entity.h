@@ -7,7 +7,7 @@
 
 #include "../../headers.h"
 
-class Entity { //based on hierarchy systems in game engines like godot
+class Entity { //hierarchy system
 
 protected:
     int id = -1;

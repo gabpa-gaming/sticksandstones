@@ -17,16 +17,14 @@
 
 auto initGameWindow() -> std::shared_ptr<sf::RenderWindow>;
 
-auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void;
+auto startGame(std::shared_ptr<sf::RenderWindow> w) -> void;
 
 auto main() -> int {
     fmt::println("Running the game...");
 
-    const auto window = initGameWindow();
-
     fmt::println("Window created");
 
-    initGame(window);
+    startGame(initGameWindow());
 
     return 0;
 }
@@ -45,24 +43,11 @@ auto initGameWindow() -> std::shared_ptr<sf::RenderWindow> {
     return window;
 }
 
-auto initGame(std::shared_ptr<sf::RenderWindow> w) -> void {
+auto startGame(std::shared_ptr<sf::RenderWindow> w) -> void {
     Room::RoomData::loadAllRooms("res/rooms.data");
 
-    auto g = Game::getInstance();
-    auto bgr = (new SpriteEntity())->create(288,240, loadTxt("bgr") ,192, 160,-1);
-
-
-    g->addChild(std::move(bgr));
-    auto player = buildPlayer();
-    g->setPlayer(*player);
-    g->addChild(std::move(player));
-    auto gen = buildGenerator();
-    g->setLevelGenerator(gen->getAs<LevelGenerator>());
-    g->addChild(std::move(gen));
-    g->addChild(std::move(buildRat()));
-    g->initAllChildren(nullptr);
-    fmt::println("Game initialized");
-    fmt::println("{}", g->getHierarchy());
-
-    g->gameLoop(w);
+    while(Game::getInstance()->gameLoop(w)) {
+        fmt::print("Restarting game...");
+        Game::resetInstance();
+    }
 }

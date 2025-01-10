@@ -52,7 +52,21 @@ auto LevelGenerator::setRoom(int x, int y) -> void {
     loadedRooms[{x,y}]-> spawnTiles();
     for(int i = 0; i < 4; i++) {
         if(loadedRooms[{x,y}] -> getAs<Room>().data->getEntrance(static_cast<Room::RoomData::Entrance>(i))) {
-            loadedRooms[{x,y}] -> addChild(buildDoor(rotate90NTimes({0,-1}, i) + sf::Vector2i{x,y}, static_cast<Room::RoomData::Entrance>(i)));
+            switch (i) {
+                case 0:
+                    if(level[x][y+1] != nullptr) loadedRooms[{x,y}] -> addChild(buildDoor(sf::Vector2i{x,y+1}, static_cast<Room::RoomData::Entrance>(i)));
+                    break;
+                case 1:
+                    if(level[x+1][y] != nullptr)loadedRooms[{x,y}] -> addChild(buildDoor(sf::Vector2i{x+1,y}, static_cast<Room::RoomData::Entrance>(i)));
+                break;
+                case 2:
+                    if(level[x][y-1] != nullptr) loadedRooms[{x,y}] -> addChild(buildDoor(sf::Vector2i{x,y-1}, static_cast<Room::RoomData::Entrance>(i)));
+                break;
+                case 3:
+                    if(level[x-1][y] != nullptr) loadedRooms[{x,y}] -> addChild(buildDoor(sf::Vector2i{x-1,y}, static_cast<Room::RoomData::Entrance>(i)));
+                break;
+                default: break;
+            }
         }
     }
     loadedRooms[{x,y}]-> initAllChildren(this);

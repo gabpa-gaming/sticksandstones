@@ -27,8 +27,10 @@ auto PhysicsEntity::tryPhysicsMove(sf::Vector2f moveDelta) -> bool {
         dislocate(moveDelta.x, moveDelta.y);
         return true;
     }
-    onCollision(cols[0]);
-
+    while(!cols.empty()) {
+        onCollision(cols[0]);
+        cols.erase(cols.begin());
+    }
     auto colsXIncrement = checkPhysicsMove({moveDelta.x,0});
 
     if(colsXIncrement.empty()) {
@@ -46,7 +48,6 @@ auto PhysicsEntity::tryPhysicsMove(sf::Vector2f moveDelta) -> bool {
 }
 
 auto PhysicsEntity::physicsUpdate(float deltaT) -> void {
-    //fmt::print("PhysicsUpdate\n{}", deltaT);
     velocity += acceleration * deltaT;
     if(magnitude(velocity) > topSpeed) {
         velocity = normalize(velocity) * topSpeed;

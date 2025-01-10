@@ -13,6 +13,8 @@ class HealthController : public virtual CollidableEntity {
 
     float health = 20;
 
+    bool dead = false;
+
     TickingEntity* stateMachine = nullptr;
 
     sf::Clock clock;
@@ -36,6 +38,9 @@ public:
 
     auto takeDamage(float amount) -> void;
 
+    auto getHealth() -> float;
+
+    auto isDead() -> bool;
 
     auto virtual create(float x, float y, std::bitset<8> collisionMask, std::bitset<8> collidesWith, float width, float height, float hp, float
                         contactDmg, Entity *topParent) -> std::unique_ptr<Entity>;

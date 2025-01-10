@@ -16,6 +16,10 @@
 
 auto PlayerController::physicsUpdate(float deltaT) -> void {
     direction = sf::Vector2f(0,0);
+    if(getChildOfTypeRecursive<HealthController>()->isDead()) {
+        ControlledPhysicsEntity::physicsUpdate(deltaT);
+        return;
+    }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
         direction.y += -1;
     }
@@ -28,38 +32,44 @@ auto PlayerController::physicsUpdate(float deltaT) -> void {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
         direction.x += 1;
     }
+
+    auto attackOrUseDir = sf::Vector2i();
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && canAttack) {
-        canAttack = false;
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, -1})));
+        attackOrUseDir = {0, -1};
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && canAttack) {
-        canAttack = false;
+        attackOrUseDir = {1, 0};
         getChildOfTypeRecursive<SpriteEntity>()->setFlipX(false);
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({1, 0})));
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && canAttack) {
-        canAttack = false;
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({0, 1})));
+        attackOrUseDir = {0, 1};
     }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && canAttack) {
-        canAttack = false;
+        attackOrUseDir = {-1, 0};
         getChildOfTypeRecursive<SpriteEntity>()->setFlipX(true);
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack({-1, 0})));
     }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+    if(!(attackOrUseDir.x == 0 && attackOrUseDir.y == 0) && interactClock.getElapsedTime().asSeconds() > interactTime & getChildOfTypeRecursive<Interactor>()->useItem(attackOrUseDir)) {
+        interactClock.restart();
+    } else if(!(attackOrUseDir.x == 0 && attackOrUseDir.y == 0)) {
+        canAttack = false;
+        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack(attackOrUseDir)));
+    }
+
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E) && interactClock.getElapsedTime().asSeconds() > interactTime) {
+        interactClock.restart();
         getChildOfTypeRecursive<Interactor>()->interactClosest();
     }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Grave)) {
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Grave) && interactClock.getElapsedTime().asSeconds() > interactTime) {
+        interactClock.restart();
         Game::debugModeOn = !Game::debugModeOn;
     }
 
     ControlledPhysicsEntity::physicsUpdate(deltaT);
-
 }
 
 auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity> {
     auto displacement = range * sf::Vector2f{static_cast<float>(dir.x),static_cast<float>(dir.y)}*static_cast<float>(TILE_SIZE)*Game::PIXEL_SCALE;
-    auto proj = buildBaseProjectile(4, 0,"attack",
+    auto proj = buildBaseProjectile(damage, 0,"attack",
         0.75f, 0.75f,
         loadTxt("attack"), attackSpeed,
         this->parent->getChildOfTypeRecursive<HealthController>(),
@@ -68,6 +78,7 @@ auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<En
     proj->getChildOfType<Projectile>()->onDeath = [this](Projectile& ref) {
         this->canAttack = true;
     };
+
     auto stateMachine = dynamic_cast<TickingEntity*>(proj.get());
     const int ATTACK_FRAME_COUNT = 6;
     stateMachine->states[0].tickLength = static_cast<int>(Game::STATE_MACHINE_TICK_RATE * (attackSpeed / (ATTACK_FRAME_COUNT-1)));
@@ -81,3 +92,5 @@ auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<En
     proj->initAllChildren(Game::getInstance()->currentRoom);
     return std::move(proj);
 }
+
+

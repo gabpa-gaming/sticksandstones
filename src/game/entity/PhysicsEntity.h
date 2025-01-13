@@ -14,6 +14,8 @@ class PhysicsEntity : public virtual CollidableEntity {
 public:
     float topSpeed = 150;
 
+    bool ignoreCollisionsInMovement = false;
+
     sf::Vector2f velocity;
     sf::Vector2f acceleration;
 

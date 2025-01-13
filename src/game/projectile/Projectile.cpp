@@ -13,8 +13,15 @@ void Projectile::onCollision(CollidableEntity *other) {
     auto hp = dynamic_cast<HealthController*>(other);
     if(hp) {
         hp->takeDamage(damage);
+        penetrateCount--;
+        if(penetrateCount <= 0) {
+            kill();
+        }
     }
     hit.push_back(other);
+    if(!penetrateWall&&(other->collisionMask.to_ulong() & static_cast<int>(CollidableEntity::wall))) {
+        kill();
+    }
     ControlledPhysicsEntity::onCollision(other);
 }
 

@@ -42,8 +42,6 @@ add_executable(main src/main.cpp
         src/game/entity/ControlledPhysicsEntity.h
         src/game/entity/TickingEntity.cpp
         src/game/entity/TickingEntity.h
-        src/game/IEventHandler.cpp
-        src/game/IEventHandler.h
         src/game/Builders.cpp
         src/game/Builders.h
         src/game/entity/HealthController.cpp

@@ -55,6 +55,8 @@ public:
     template<typename E>
     [[nodiscard]] auto getInParents() -> E*;
 
+    [[nodiscard]] auto getParent() -> Entity*;
+
     virtual auto remove() -> void; //only use outside of loops, use endOfFrameRemove() instead for safe removal
 
     auto endOfFrameRemove() -> void;

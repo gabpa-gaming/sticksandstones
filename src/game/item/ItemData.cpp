@@ -3,9 +3,13 @@
 //
 
 #include "ItemData.h"
+
+#include <complex>
+
 #include "../Builders.h"
 #include "../level/Interactor.h"
 #include "../Game.h"
+#include "../projectile/Projectile.h"
 
 ItemData ItemData::itemList[] = {
     ItemData(0, "rock", 5.f),
@@ -16,11 +20,21 @@ ItemData ItemData::itemList[] = {
 };
 
 auto ItemData::defaultThrow(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void {
-    auto itemObj = buildItemObject(item,pos);
-    itemObj->initAllChildren(Game::getInstance()->currentRoom);
-    //auto itemProjectile
-    Game::getInstance()->currentRoom->addChild(std::move(itemObj));
-    who.setItem(0, item);
+    auto itemProjectile = buildBaseProjectile(item.itemDamage, 200, "thrownItem",
+        0.5f, 0.5f, loadTxt(item.name), 3, who.getParent()->getChildOfType<HealthController>(),dir, pos.x, pos.y);
+    itemProjectile->initAllChildren(Game::getInstance()->currentRoom);
+    auto projRef = itemProjectile->getChildOfType<Projectile>();
+    projRef -> onDeath = [&item, pos](Projectile & proj) -> void {
+        auto itemObj = buildItemObject(item, proj.getGlobalPos());
+        itemObj->initAllChildren(Game::getInstance()->currentRoom);
+        (Game::getInstance()->currentRoom)->addChild(std::move(itemObj));
+    };
+    projRef -> penetrateCount = item.piercesEnemies;
+    projRef -> penetrateWall = false;
+    projRef -> collidesWith = projRef -> collidesWith.to_ulong();
+    projRef -> ignoreCollisionsInMovement = true;
+    (Game::getInstance()->currentRoom)->addChild(std::move(itemProjectile));
+    who.setItem(0, nullptr);
 };
 
 ItemData::ItemData(int spriteNumerator, std::string name, float itemDamage,

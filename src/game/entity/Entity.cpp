@@ -147,6 +147,10 @@ auto Entity::addChild(std::unique_ptr<Entity> child) -> void {
     children.push_back(std::move(child));
 }
 
+auto Entity::getParent() -> Entity * {
+    return parent;
+}
+
 auto Entity::remove() -> void {
     int i = 0;
     for(; i < parent->children.size(); i++) {
@@ -199,3 +203,4 @@ template auto Entity::getAs<PlayerUI>() -> PlayerUI&;
 
 template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;
 template auto Entity::getInParents<PlayerController>() -> PlayerController*;
+template auto Entity::getInParents<HealthController>() -> HealthController*;

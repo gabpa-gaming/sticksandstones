@@ -37,8 +37,11 @@ auto Interactor::addItem(ItemData &item) -> bool {
 }
 
 auto Interactor::dropFirstItem() -> void {
+    if(items.front() == nullptr) {
+        return;
+    }
     buildItemObject(*items.front(), getGlobalPos());
-    items.back() = nullptr;
+    items.front() = nullptr;
 }
 
 auto Interactor::dropLastItem() -> void {
@@ -80,6 +83,6 @@ auto Interactor::create(float range) -> std::unique_ptr<Entity> {
     return std::move(base);
 }
 
-void Interactor::setItem(int i,  ItemData & itemData) {
-    items[i] = &itemData;
+void Interactor::setItem(int i,  ItemData * itemData) {
+    items[i] = itemData;
 }

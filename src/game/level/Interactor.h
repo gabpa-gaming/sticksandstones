@@ -33,7 +33,7 @@ public:
 
     auto create(float range) -> std::unique_ptr<Entity>;
 
-    void setItem(int i, ItemData &itemData);
+    void setItem(int i, ItemData *itemData);
 };
 
 

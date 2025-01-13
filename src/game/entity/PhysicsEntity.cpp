@@ -23,7 +23,11 @@ auto PhysicsEntity::checkPhysicsMove(sf::Vector2f moveDelta) -> std::vector<Coll
 
 auto PhysicsEntity::tryPhysicsMove(sf::Vector2f moveDelta) -> bool {
     auto cols = checkPhysicsMove(moveDelta);
-    if(cols.empty()) {
+    if(cols.empty() || ignoreCollisionsInMovement) {
+        while(ignoreCollisionsInMovement && !cols.empty()) {
+            onCollision(cols[0]);
+            cols.erase(cols.begin());
+        }
         dislocate(moveDelta.x, moveDelta.y);
         return true;
     }

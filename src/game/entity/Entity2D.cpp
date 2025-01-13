@@ -30,7 +30,7 @@ auto Entity2D::addChild(std::unique_ptr<Entity> child) -> void {
     return Entity::addChild(std::move(child));
 }
 
-auto Entity2D::updateChildrenParentPoses(float x, float y) -> void {
+auto Entity2D::updateChildrenParentPoses(float x, float y) const -> void {
     for (auto &child : children) {
         auto p = dynamic_cast<Entity2D*>(child.get());
         if (p != nullptr) {

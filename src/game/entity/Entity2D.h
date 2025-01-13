@@ -21,7 +21,7 @@ public:
     auto updateParentPos(float x, float y) -> void;
     auto addChild(std::unique_ptr<Entity> child) -> void override;
 
-    auto updateChildrenParentPoses(float x, float y) -> void;
+    auto updateChildrenParentPoses(float x, float y) const -> void;
     auto virtual setGlobalPos(float x, float y) -> void;
     auto virtual setLocalPos(float x, float y) -> void;
     auto dislocate(float x, float y) -> void;

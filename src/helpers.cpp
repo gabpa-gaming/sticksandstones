@@ -66,3 +66,7 @@ auto rotate90NTimes(sf::Vector2i v, int n) -> sf::Vector2i {
     }
     return v;
 }
+
+auto rotateVectorThetaRadians(sf::Vector2f v, float theta) -> sf::Vector2f {
+    return {v.x * std::cos(theta) - v.y * std::sin(theta), v.x * std::sin(theta) + v.y * std::cos(theta)};
+}

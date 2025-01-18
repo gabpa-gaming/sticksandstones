@@ -7,25 +7,30 @@
 #include "../entity/HealthController.h"
 
 void Projectile::onCollision(CollidableEntity *other) {
+    if(killed) {
+        return;
+    }
     if(std::ranges::find(hit, other) != hit.end()) {
         return;
     }
     auto hp = dynamic_cast<HealthController*>(other);
     if(hp) {
         hp->takeDamage(damage);
+        hp->getKnockedBack(projectileKnockbackForce, projectileKnockbackTime);
         penetrateCount--;
         if(penetrateCount <= 0) {
             kill();
         }
     }
     hit.push_back(other);
-    if(!penetrateWall&&(other->collisionMask.to_ulong() & static_cast<int>(CollidableEntity::wall))) {
+    if(!penetrateWall&&(other->collisionMask.to_ulong() & getAsBitMask(CollidableEntity::wall))) {
         kill();
     }
     ControlledPhysicsEntity::onCollision(other);
 }
 
 auto Projectile::kill() -> void {
+    killed = true;
     onDeath(*this);
     parent->endOfFrameRemove();
 }

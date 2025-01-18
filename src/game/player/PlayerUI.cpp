@@ -9,7 +9,7 @@
 
 auto PlayerUI::inform(std::string text) -> void {
     informatorText.setString(text);
-    informatorText.setColor(sf::Color::White);
+    informatorText.setFillColor(sf::Color::White);
     informatorSprite->setColor(sf::Color::White);
     auto rect = informatorText.getLocalBounds();
     informatorText.setOrigin(rect.left + rect.width/2.0f,rect.top  + rect.height/2.0f);
@@ -53,7 +53,7 @@ auto PlayerUI::create() -> std::unique_ptr<Entity> {
     this -> informatorSprite = &informatorSprite->getAs<SpriteEntity>();
 
     informatorText.setFont(*font);
-    informatorText.setCharacterSize(32);
+    informatorText.setCharacterSize(20);
     informatorText.setString("");
     informatorText.setPosition(GAME_WIDTH_UNSCALED / 2 * Game::PIXEL_SCALE,(GAME_HEIGHT_UNSCALED - 16) * Game::PIXEL_SCALE);
 
@@ -78,6 +78,9 @@ auto PlayerUI::create() -> std::unique_ptr<Entity> {
     auto fadeIntoDeath = [this](TickingEntity &caller, StateMachineState &state) -> void {
         sf::Color color = sf::Color(255,255,255, static_cast<sf::Uint8>(((1.f + caller.tickCounter) / state.tickLength) * 255));
         this->deathScreenSprite->setColor(color);
+        if(caller.tickCounter == state.tickLength) {
+            this->deathScreenSprite->setColor(sf::Color::White);
+        }
     };
 
     auto hideUI = [this](TickingEntity &caller, StateMachineState &state) -> void {
@@ -92,12 +95,15 @@ auto PlayerUI::create() -> std::unique_ptr<Entity> {
         {-1,1, 0, "noting", updateHP},
         {-1,250, 1, "inform", updateHP},
         {-1,100, -2, "disappearCompletely", disappearCompletely},
-        {-1,500, 1, "death", updateHP, hideUI},
+        {-1,150, 1, "death", updateHP, hideUI},
         {-1,50, 1, "death", fadeIntoDeath},
         {-1,1, 0, "death"},
+        {-1,1, 1, "win", updateHP, [this](auto&,auto&) {
+            this -> deathScreenSprite->getAs<SpriteEntity>().setTexture(*loadTxt("winScreen"));}},
+        {0,200, 1, "win",fadeIntoDeath, updateHP},
+        {-1,100, 0, "win", hideUI}
     };
 
-    inform("Meow meow!!");
 
     return base;
 }

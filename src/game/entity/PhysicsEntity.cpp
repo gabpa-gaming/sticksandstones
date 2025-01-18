@@ -9,6 +9,12 @@ auto PhysicsEntity::getName() const -> std::string {
     return fmt::format("{}, V: ({},{}), A: ({},{})", CollidableEntity::getName(), velocity.x,velocity.y,acceleration.x,acceleration.y);
 }
 
+auto PhysicsEntity::getKnockedBack(sf::Vector2f force, float time) -> void {
+    knockbackForce = force;
+    knockbackTime = time;
+    velocity = {0,0};
+}
+
 auto PhysicsEntity::checkPhysicsMove(sf::Vector2f moveDelta) -> std::vector<CollidableEntity *> {
     auto movedCollider = sf::FloatRect(collider.getPosition() + moveDelta, collider.getSize());
     auto collisions = Game::getInstance()->rectCast(movedCollider, collidesWith);
@@ -57,6 +63,10 @@ auto PhysicsEntity::physicsUpdate(float deltaT) -> void {
         velocity = normalize(velocity) * topSpeed;
     }
     sf::Vector2f moveDelta = velocity * deltaT;
+    if(knockbackTime > 0) {
+        moveDelta += knockbackForce * knockbackTime;
+    }
+
     tryPhysicsMove(moveDelta);
 }
 

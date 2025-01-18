@@ -39,6 +39,7 @@ auto CollidableEntity::checkPosForCollisons() const -> std::vector<CollidableEnt
 }
 
 auto CollidableEntity::onCollision(CollidableEntity *other) -> void {
+    onCollisionEvent(other, this);
     //fmt::println("{} collided with {}!", getName(), other->getName());
 }
 

@@ -52,7 +52,13 @@ auto PlayerController::physicsUpdate(float deltaT) -> void {
         interactClock.restart();
     } else if(!(attackOrUseDir.x == 0 && attackOrUseDir.y == 0)) {
         canAttack = false;
-        Game::getInstance()->currentRoom->addChild(std::move(buildPlayerAttack(attackOrUseDir)));
+        addChild(std::move(buildPlayerAttack(attackOrUseDir)));
+
+    }
+
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && interactClock.getElapsedTime().asSeconds() > interactTime) {
+        interactClock.restart();
+        getChildOfTypeRecursive<Interactor>()->dropFirstItem();
     }
 
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::E) && interactClock.getElapsedTime().asSeconds() > interactTime) {
@@ -64,6 +70,14 @@ auto PlayerController::physicsUpdate(float deltaT) -> void {
         Game::debugModeOn = !Game::debugModeOn;
     }
 
+    auto item = getChildOfType<Interactor>()->items[0];
+    if(item) {
+        heldItemSprite->setTexture(*loadTxt(item->name));
+    }else {
+        heldItemSprite->setTexture(*loadTxt("nothing"));
+    }
+
+
     ControlledPhysicsEntity::physicsUpdate(deltaT);
 }
 
@@ -73,12 +87,16 @@ auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<En
         0.75f, 0.75f,
         loadTxt("attack"), attackSpeed,
         this->parent->getChildOfTypeRecursive<HealthController>(),
-        dir, getGlobalPos().x + displacement.x, getGlobalPos().y+displacement.y);
+        {static_cast<float>(dir.x),static_cast<float>(dir.y)}, getGlobalPos().x + displacement.x, getGlobalPos().y+displacement.y);
 
-    proj->getChildOfType<Projectile>()->onDeath = [this](Projectile& ref) {
+    auto projRef = proj->getChildOfType<Projectile>();
+
+    projRef->onDeath = [this](Projectile& ref) {
         this->canAttack = true;
     };
-
+    projRef->knockbackTime = 0.25f;
+    projRef->knockbackForce = sf::Vector2f(dir.x * 4, dir.y * 4);
+    projRef->ignoreCollisionsInMovement = true;
     auto stateMachine = dynamic_cast<TickingEntity*>(proj.get());
     const int ATTACK_FRAME_COUNT = 6;
     stateMachine->states[0].tickLength = static_cast<int>(Game::STATE_MACHINE_TICK_RATE * (attackSpeed / (ATTACK_FRAME_COUNT-1)));
@@ -89,7 +107,7 @@ auto PlayerController::buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<En
         stateMachine->states.push_back(nextState);
     }
 
-    proj->initAllChildren(Game::getInstance()->currentRoom);
+    proj->initAllChildren(this);
     return std::move(proj);
 }
 

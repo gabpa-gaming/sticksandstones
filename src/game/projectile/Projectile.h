@@ -11,9 +11,14 @@ class Projectile : public virtual ControlledPhysicsEntity {
 
     std::vector<CollidableEntity*> hit;
 
+    bool killed = false;
+
 public:
     int penetrateCount = 99999;
     bool penetrateWall = true;
+
+    sf::Vector2f projectileKnockbackForce;
+    float projectileKnockbackTime = 0;
 
     std::function<void(Projectile & caller)> onDeath =
             [](Projectile & caller) {};

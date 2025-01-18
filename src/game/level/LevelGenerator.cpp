@@ -13,11 +13,26 @@ std::string LevelGenerator::getClassName() const {
 auto LevelGenerator::generateNextLevel() -> void {
     levelCounter++;
 
+    if(currentRoomPos != sf::Vector2i{-1,-1}) {
+        loadedRooms[currentRoomPos]->setEnabled(false);
+    }
+    while(!loadedRooms.empty()) {
+        loadedRooms.begin()->second->endOfFrameRemove();
+        loadedRooms.erase(loadedRooms.begin());
+    }
+    for (int i = 0; i < 35; ++i) {
+        for (int j = 0; j < 35; ++j) {
+            level[i][j] = nullptr;
+        }
+    }
+    currentRoomPos = {-1, -1};
+
     if(generationSeed == 0){
         std::random_device rd;
         generationSeed = rd();
     }
     rng.seed(generationSeed);
+    Game::getInstance()->miscRNG.seed(generationSeed);
     while(!tryGenerateNextLevel());
 }
 
@@ -76,7 +91,6 @@ auto LevelGenerator::setRoom(int x, int y) -> void {
 }
 
 auto LevelGenerator::tryGenerateNextLevel() -> bool {
-    levelCounter = 1;
     int roomArr[MAP_SIZE][MAP_SIZE] = {{0}};
 
     int baseSize = 2*levelCounter + 2;

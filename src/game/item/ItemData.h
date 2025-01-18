@@ -20,25 +20,31 @@ struct ItemData {
     const int piercesEnemies;
     const bool rare;
     const bool breaksOnThrow;
+    const std::function<void(ItemData &item, sf::Vector2f pos)> onKill;
 
     static auto defaultThrow(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 
     explicit ItemData(int spriteNumerator, std::string name, float itemDamage = 4.f,
              const std::function<void(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who)> &onUse = defaultThrow,
-             bool useOnPickup = false, bool isFragile = false, int piercesEnemies = 99, bool rare = false, bool breaksOnThrow = true);
+             bool useOnPickup = false, bool isFragile = false, int piercesEnemies = 99, bool rare = false, bool breaksOnThrow = true,
+             std::function<void(ItemData &item, sf::Vector2f pos)> onKill = [](ItemData &item, sf::Vector2f pos) {});
 
 
     static auto getItemData(std::string name) -> ItemData &;
 
     static auto meatOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 
-    static auto initItems() -> void;
+    static auto appleOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
+
+    static auto exitOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
+
+    static auto bombOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 
     static auto helmetOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 
     static auto daggerOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 
-    auto tomBlessingOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
+    static auto tomBlessingOnUse(ItemData &item, sf::Vector2f pos, sf::Vector2i dir, Interactor &who) -> void;
 };
 
 

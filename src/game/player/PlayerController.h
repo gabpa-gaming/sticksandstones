@@ -8,6 +8,8 @@
 #include "../entity/TickingEntity.h"
 #include "../entity/ControlledPhysicsEntity.h"
 
+class SpriteEntity;
+
 class PlayerController : public virtual ControlledPhysicsEntity {
 
     bool canAttack = true;
@@ -18,7 +20,10 @@ class PlayerController : public virtual ControlledPhysicsEntity {
 public:
     float attackSpeed = 0.5f;
     float range = 0.65f;
-    float damage = 2.75f;
+    float damage = 3.75f;
+
+    SpriteEntity* heldItemSprite = nullptr;
+
     auto physicsUpdate(float deltaT) -> void override;
 
     auto buildPlayerAttack(sf::Vector2i dir) -> std::unique_ptr<Entity>;

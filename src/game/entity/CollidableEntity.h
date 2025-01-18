@@ -10,7 +10,7 @@
 
 class CollidableEntity : public virtual Entity2D{
 public:
-    std::bitset<8> collisionMask = 0; //represents object types that can this represents
+    std::bitset<8> collisionMask = 0; //represents object types that this is
     std::bitset<8> collidesWith = 0; //represents what object this will collide with
 
     sf::FloatRect collider;
@@ -18,6 +18,8 @@ public:
     float height;
     sf::Vector2f colliderOffset;
     bool collisionEnabled = true;
+
+    std::function<void(CollidableEntity*, CollidableEntity*)> onCollisionEvent = [](CollidableEntity* other, CollidableEntity* me) {};
 
     enum ColliderType { //represents bit in the collision mask
         wall,

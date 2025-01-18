@@ -8,7 +8,6 @@
 #include "../Builders.h"
 #include "../Game.h"
 
-std::vector<ItemData*> Interactor::items;
 
 auto Interactor::interactClosest() -> void {
     auto inRange = Game::getInstance()->rectCast(collider, getAsBitMask(interactible));
@@ -40,7 +39,9 @@ auto Interactor::dropFirstItem() -> void {
     if(items.front() == nullptr) {
         return;
     }
-    buildItemObject(*items.front(), getGlobalPos());
+    auto item = buildItemObject(*items.front(), getGlobalPos());
+    item->initAllChildren(Game::getInstance()->currentRoom);
+    Game::getInstance()->currentRoom->addChild(std::move(item));
     items.front() = nullptr;
 }
 

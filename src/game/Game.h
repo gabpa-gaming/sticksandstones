@@ -38,6 +38,10 @@ class Game : public virtual Entity2D {
     bool rPressed = false;
 
 public:
+    std::string chosenFileName;
+
+    std::vector<std::string> itemPool;
+
     static bool debugModeOn;
 
     static float PIXEL_SCALE;
@@ -55,11 +59,15 @@ public:
 
     static auto getInstance() -> std::shared_ptr<Game>; //root game entity, is a parent to all entities
 
+    auto chooseSaveFile(std::shared_ptr<sf::RenderWindow> window) -> bool;
+
     auto initGame() -> void;
 
     static auto tilePosToScreenCoords(sf::Vector2f pos) -> sf::Vector2f;
 
     auto gameLoop(std::shared_ptr<sf::RenderWindow> const &window) -> bool;
+
+    auto goToNextLevel() -> void;
 
     auto drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void;
 
@@ -71,7 +79,11 @@ public:
 
     [[nodiscard]] auto rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vector<CollidableEntity*>;
 
+    auto getCurrentEnemyScaling() -> float;
+
     [[nodiscard]] auto getPlayer() const -> Entity &;
+
+    [[nodiscard]] auto getPlayerUI() const -> PlayerUI &;
 
     auto setPlayer(Entity &p) -> void;
 
@@ -80,6 +92,10 @@ public:
     [[nodiscard]] auto getLevelGenerator() const -> LevelGenerator&;
 
     auto setLevelGenerator(LevelGenerator &p) -> void;
+
+    auto saveGameToFile() -> void;
+
+    auto loadGameFromFile() -> void;
 
     [[nodiscard]] auto getClassName() const -> std::string override {return "RootGameEntity";}
 

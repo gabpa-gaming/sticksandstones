@@ -32,7 +32,84 @@ auto Game::getInstance() -> std::shared_ptr<Game> {
     return instance;
 }
 
+auto Game::chooseSaveFile(std::shared_ptr<sf::RenderWindow> window) -> bool{
+
+    std::string info = "Please input file name for new game... \n";
+    std::string input = "";
+    std::string info2 = "\n ...Or select a played file by typing its name: \n";
+
+    if(!std::filesystem::exists("sav")) {
+        if(!std::filesystem::create_directory("sav")) {
+            throw std::logic_error("Failed to create sav folder");
+        }
+    }
+
+    std::vector<std::string> saves;
+    for (const auto& entry : std::filesystem::directory_iterator("sav/")) {
+        if (entry.is_regular_file()) {
+            saves.push_back(entry.path().filename().string());
+            info2+= entry.path().filename().string() + "\n";
+        }
+    }
+
+    sf::Font font;
+    if (!font.loadFromFile("res/fonts/Silkscreen-Regular.ttf")) {
+        throw std::logic_error("Failed to load font");
+    }
+
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+
+
+    text.setString(info+input+info2);
+    bool end = false;
+    while (window -> isOpen() && !end) {
+        // check all the window's events that were triggered since the last iteration of the loop
+        sf::Event event;
+        while (window -> pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window -> close();
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Enter) {
+                    std::regex invalidChars("[<>:\"/\\|?*]");
+                    if (!std::regex_search(input, invalidChars)) {
+                        chosenFileName = input;
+                        end = true;
+                        break;
+                    }
+                }
+            }
+            if(event.type == sf::Event::TextEntered && event.text.unicode < 128) {
+                if(event.text.unicode == 8) {
+                    if(input.length() > 0) {
+                        input.erase(input.length()-1);
+                    }
+                }else if(input.length() < 15) {
+                    input += static_cast<char>(event.text.unicode);
+                }
+                text.setString(info+input+info2);
+            }
+
+        }
+        window -> clear(sf::Color::Black);
+
+        window->draw(text);
+
+        window -> display();
+    }
+
+
+
+    if(std::ranges::find(saves, input) != saves.end()) {
+        return true;
+    }
+    return false;
+}
+
 auto Game::initGame() -> void {
+    itemPool = {"tomBlessing","meat", "dagger", "helmet", "apple"};
+
     auto bgr = (new SpriteEntity())->create(288,240, loadTxt("bgr") ,192, 160,-5);
     auto wallColliderR = (new CollidableEntity())->create((GAME_WIDTH_UNSCALED)* Game::PIXEL_SCALE,0,
         CollidableEntity::getAsBitMask(CollidableEntity::wall),0,
@@ -61,6 +138,9 @@ auto Game::initGame() -> void {
 
     auto playerUI = (new PlayerUI)->create();
     setPlayerUI(std::move(playerUI));
+
+    goToNextLevel();
+
     fmt::println("Game initialized");
     fmt::println("{}", getHierarchy());
 }
@@ -82,6 +162,9 @@ std::unique_ptr<Entity> Game::create() {
 }
 
 auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> bool {
+    if(chooseSaveFile(window)) {
+        loadGameFromFile();
+    }
     gameClock.restart();
     //sf::Clock frameCounter;
     float lastFrameTime = 60;
@@ -160,6 +243,17 @@ auto Game::gameLoop(std::shared_ptr<sf::RenderWindow>const& window) -> bool {
     return false;
 }
 
+auto Game::goToNextLevel() -> void {
+    if(levelGenerator->levelCounter != 3) {
+        playerUI->inform(fmt::format("Abandoned cheese factory ({})", Game::getInstance()->getLevelGenerator().levelCounter+1));
+        levelGenerator->generateNextLevel();
+        levelGenerator->setRoomToStart();
+        return;
+    }
+
+    playerUI->setStateByName("win");
+}
+
 auto Game::drawFrame(std::shared_ptr<sf::RenderWindow> window) const -> void {
     auto entities = getAllChildrenOfTypeRecursive<SpriteEntity>();
     std::vector<SpriteEntity*> drawable;
@@ -236,8 +330,16 @@ auto Game::rectCast(sf::FloatRect rect, std::bitset<8> mask) const -> std::vecto
     return out;
 }
 
+auto Game::getCurrentEnemyScaling() -> float {
+    return std::pow(1.15f, levelGenerator->levelCounter);
+}
+
 auto Game::getPlayer() const -> Entity & {
     return *player;
+}
+
+auto Game::getPlayerUI() const -> PlayerUI & {
+    return *playerUI;
 }
 
 auto Game::setPlayer(Entity& p) -> void {
@@ -257,3 +359,74 @@ auto Game::setLevelGenerator(LevelGenerator &p) -> void {
     levelGenerator = &p;
 }
 
+auto Game::saveGameToFile() -> void {
+    std::ofstream outFile("sav/"+chosenFileName, std::ios::trunc);
+    if (outFile.is_open()) {
+        outFile << levelGenerator->levelCounter;
+        outFile << "\n\n";
+        auto playerInteractor = player->getChildOfTypeRecursive<Interactor>();
+        auto playerHP = player->getChildOfTypeRecursive<HealthController>();
+        auto playerController = player->getChildOfType<PlayerController>();
+        for(int i = 0; i < playerInteractor->items.size(); i++) {
+            auto item = playerInteractor->items[i];
+            if(item) {
+                outFile << item->name << "\n";
+            }
+            else {
+                outFile<< "\n";
+            }
+        }
+        outFile << playerHP->getHealth() << "\n";
+        outFile << playerHP->armor << "\n";
+        outFile << playerController->damage << "\n";
+        outFile << playerController->attackSpeed << "\n";
+        outFile.close();
+    }
+}
+auto Game::loadGameFromFile() -> void {
+    std::ifstream inFile("sav/"+chosenFileName);
+    levelGenerator->levelCounter = 0;
+
+    if (!inFile.is_open()) {
+        throw std::logic_error("File opening error");
+    }
+
+    auto playerInteractor = player->getChildOfTypeRecursive<Interactor>();
+    auto playerHP = player->getChildOfTypeRecursive<HealthController>();
+    auto playerController = player->getChildOfType<PlayerController>();
+
+    std::string line;
+
+    std::getline(inFile, line);
+    levelGenerator->levelCounter = std::stoi(line);
+    std::getline(inFile, line);
+
+    for(int i = 0; i < playerInteractor->items.size(); i++) {
+        std::string item;
+        std::getline(inFile, item);
+        if(item != "") {
+            playerInteractor->setItem(i, &ItemData::getItemData(item));
+        }
+        else {
+            playerInteractor->setItem(i, nullptr);
+        }
+    }
+    std::getline(inFile, line);
+
+    playerHP->setHealth(std::stof(line));
+
+    std::getline(inFile, line);
+
+    playerHP->armor = std::stof(line);
+
+    std::getline(inFile, line);
+
+    playerController->damage = std::stof(line);
+
+    std::getline(inFile, line);
+
+    playerController->attackSpeed = std::stof(line);
+
+    goToNextLevel();
+    inFile.close();
+}

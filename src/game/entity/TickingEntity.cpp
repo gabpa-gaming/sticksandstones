@@ -39,7 +39,7 @@ auto TickingEntity::setState(const int n) -> void {
 }
 
 auto TickingEntity::setStateByName(const std::string &stateName) -> bool {
-    if(states[currentState].stateName == stateName) {
+    if(isCurrentState(stateName)) {
         return true;
     }
     for (int i = 0; i < states.size(); i++) {

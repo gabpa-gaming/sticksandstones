@@ -19,7 +19,7 @@ Entity::Entity() {
 }
 
 Entity::~Entity() {
-    //fmt::println("An entity was deleted", Entity::getName());
+    fmt::println("An entity was deleted");
 }
 
 auto Entity::getEnabled() -> bool {
@@ -37,7 +37,6 @@ auto Entity::setEnabled(bool enabled) -> void {
 auto Entity::init(Entity *parent) -> void {
     initialized = true;
     this->parent = parent;
-    fmt::println("{} initialized", Entity::getName());
 }
 
 auto Entity::initAllChildren(Entity *parent) -> void {
@@ -57,17 +56,7 @@ auto Entity::getAs()  -> E & {
     return dynamic_cast<E&>(*this);
 }
 
-template<typename E>
-auto Entity::getChildOfType() const -> E* { //returns the first one in hierarchy, null if not found
-    static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
-    for (auto& child : children) {
-        auto p = dynamic_cast<E*>(child.get());
-        if (p) {
-            return p;
-        }
-    }
-    return nullptr;
-}
+
 
 template<typename E>
 auto Entity::getChildOfTypeRecursive() const -> E* { //returns the first one in hierarchy, null if not found
@@ -160,6 +149,11 @@ auto Entity::remove() -> void {
 }
 
 auto Entity::endOfFrameRemove() -> void {
+    for(int i = 0; i < Game::getInstance()->toRemove.size(); i++) {
+        if(Game::getInstance()->toRemove[i] == this) {
+            return;
+        }
+    }
     Game::getInstance()->toRemove.push_back(this);
 }
 
@@ -200,7 +194,9 @@ template auto Entity::getAs<Interactible>() -> Interactible&;
 template auto Entity::getAs<Interactor>() -> Interactor&;
 template auto Entity::getAs<CollidableEntity>() -> CollidableEntity&;
 template auto Entity::getAs<PlayerUI>() -> PlayerUI&;
+template auto Entity::getAs<PlayerController>() -> PlayerController&;
 
 template auto Entity::getInParents<TickingEntity>() -> TickingEntity*;
 template auto Entity::getInParents<PlayerController>() -> PlayerController*;
 template auto Entity::getInParents<HealthController>() -> HealthController*;
+template auto Entity::getInParents<ControlledPhysicsEntity>() -> ControlledPhysicsEntity*;

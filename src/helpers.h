@@ -5,8 +5,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#include "headers.h"
-
 auto tabAllLines(const std::string& input) -> std::string;
 
 auto magnitude(sf::Vector2f v) -> float;
@@ -22,5 +20,7 @@ auto rotate90CCW(sf::Vector2i v) -> sf::Vector2i;
 auto rotate90CW(sf::Vector2i v) -> sf::Vector2i;
 
 auto rotate90NTimes(sf::Vector2i v, int n) -> sf::Vector2i;
+
+auto rotateVectorThetaRadians(sf::Vector2f v, float theta) -> sf::Vector2f;
 
 #endif //HELPERS_H

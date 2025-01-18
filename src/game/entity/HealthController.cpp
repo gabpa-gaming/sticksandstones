@@ -4,6 +4,7 @@
 
 #include "HealthController.h"
 
+#include "ControlledPhysicsEntity.h"
 #include "TickingEntity.h"
 
 
@@ -19,6 +20,11 @@ void HealthController::init(Entity* parent) {
     stateMachine = getInParents<TickingEntity>();
 }
 
+auto HealthController::getKnockedBack(sf::Vector2f force, float time) -> void {
+    auto physicsEntity = getInParents<ControlledPhysicsEntity>();
+    if(physicsEntity) physicsEntity->getKnockedBack(force, time);
+}
+
 void HealthController::onCollision(CollidableEntity *other) {
     CollidableEntity::onCollision(other);
     if(auto p = dynamic_cast<HealthController*>(other)) {
@@ -27,6 +33,8 @@ void HealthController::onCollision(CollidableEntity *other) {
 }
 
 auto HealthController::takeDamage(float amount) -> void {
+    amount -= armor;
+    amount = std::floor(amount);
     if(amount == 0 || dead) {
         return;
     }
@@ -35,7 +43,7 @@ auto HealthController::takeDamage(float amount) -> void {
     }
     clock.restart();
     health -= amount;
-    if(stateMachine && amount) {
+    if(stateMachine && amount > 0) {
         stateMachine->setStateByName("damage");
     }
     fmt::println("{} took {} dmg, new health: {}", getName() ,amount, health);
@@ -58,4 +66,8 @@ std::unique_ptr<Entity> HealthController::create(float x, float y, std::bitset<8
     contactDamage = contactDmg;
     topParentRef = topParent;
     return CollidableEntity::create(x, y, collisionMask, collidesWith, width, height);
+}
+
+void HealthController::setHealth(float hp) {
+    health = hp;
 }

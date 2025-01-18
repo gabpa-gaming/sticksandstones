@@ -19,7 +19,9 @@
 #include <algorithm>
 #include <ranges>
 #include <random>
-#include <memory>
+#include <regex>
+#include <filesystem>
+#include <fstream>
 
 #include "fmt/xchar.h"
 #include "SFML/Graphics.hpp"

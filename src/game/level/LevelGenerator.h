@@ -16,11 +16,7 @@ class LevelGenerator : public virtual Entity2D{
 
     Room::RoomData* level[35][35] = {};
 
-    std::mt19937_64 rng;
-
     unsigned long generationSeed = 0;
-
-    int levelCounter = 0;
 
     struct VectorHasher {
         auto operator()(const sf::Vector2i& v) const -> size_t {
@@ -30,6 +26,10 @@ class LevelGenerator : public virtual Entity2D{
 
     std::unordered_map<sf::Vector2i, Room*, VectorHasher> loadedRooms;
 public:
+    std::mt19937_64 rng;
+
+    int levelCounter = 0;
+
     auto getClassName() const -> std::string override;
 
     auto generateNextLevel() -> void;

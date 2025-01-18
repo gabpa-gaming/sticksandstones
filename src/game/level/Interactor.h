@@ -15,7 +15,7 @@ public:
     [[nodiscard]] auto getClassName() const -> std::string override { return "Interactor";}
 
 
-    static std::vector<ItemData *> items;
+    std::vector<ItemData *> items;
 
     auto interactClosest() -> void;
 

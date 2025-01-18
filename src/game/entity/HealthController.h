@@ -24,6 +24,8 @@ public:
 
     std::function<void(Entity&)> onDeathEvent = [&](Entity& e) {};
 
+    float armor  = 0;
+
     float invTime = 0.f;
 
     float contactDamage = 0;
@@ -33,6 +35,8 @@ public:
     auto init(Entity * parent) -> void override;
 
     auto getClassName() const -> std::string override {return "HealthController";}
+
+    auto getKnockedBack(sf::Vector2f force, float time) -> void;
 
     auto onCollision(CollidableEntity *other) -> void override;
 
@@ -45,6 +49,7 @@ public:
     auto virtual create(float x, float y, std::bitset<8> collisionMask, std::bitset<8> collidesWith, float width, float height, float hp, float
                         contactDmg, Entity *topParent) -> std::unique_ptr<Entity>;
 
+    void setHealth(float hp);
 };
 
 

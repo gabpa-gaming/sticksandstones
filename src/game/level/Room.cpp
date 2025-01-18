@@ -136,6 +136,23 @@ auto Room::spawnTiles() -> void {
                 case 'E': // ementerror
                     entity = buildEmenterror();
                 break;
+                case 'm': // miniterror 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'M': // miniterror
+                    entity = buildMiniterror();
+                break;
+                case 'c': // camembert 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'C': // camembert
+                    entity = buildCamembert();
+                break;
+                case '#': // mozzarella
+                    entity = buildSirMozzarella();
+                break;
                 case 'i': // common item 50 50
                     if(Game::getInstance()->miscRNG() % 2 == 0) {
                         continue;
@@ -145,6 +162,32 @@ auto Room::spawnTiles() -> void {
                         auto name = possibilities[Game::getInstance()->miscRNG() % possibilities.size()];
                         entity = buildItemObject(ItemData::getItemData(name), {0,0});
                     }
+                break;
+                case 'o': // bomb 50 50
+                    if(Game::getInstance()->miscRNG() % 2 == 0) {
+                        continue;
+                    }
+                case 'O': // bomb
+                {
+                    entity = buildItemObject(ItemData::getItemData("bomb"), {0,0});
+                }
+                break;
+                case 'P': // rare item
+                {
+                    std::string itemName = "apple";
+                    if(Game::getInstance()->itemPool.size() > 0) {
+                        int i = Game::getInstance()->miscRNG() % Game::getInstance()->itemPool.size();
+                        itemName = Game::getInstance()->itemPool[i];
+                        //Game::getInstance()->itemPool.erase(Game::getInstance()->itemPool.begin() + i);
+                    }
+
+                    entity = buildItemObject(ItemData::getItemData(itemName), {0,0});
+                }
+                break;
+                case 'T': // tutorial sprite
+                {
+                    entity = buildTutorial();
+                }
                 break;
                 default:
                     continue;

@@ -41,7 +41,16 @@ public:
     [[nodiscard]] virtual auto getName() const -> std::string;
 
     template<typename E>
-    [[nodiscard]] auto getChildOfType() const -> E*;
+    auto getChildOfType() const -> E* { //returns the first one in hierarchy, null if not found
+        static_assert(std::is_base_of_v<Entity, E>, "E must derive from Entity");
+        for (auto& child : children) {
+            auto p = dynamic_cast<E*>(child.get());
+            if (p) {
+                return p;
+            }
+        }
+        return nullptr;
+    }
 
     template<class E>
     [[nodiscard]] auto getChildOfTypeRecursive() const -> E*;

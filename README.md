@@ -1,7 +1,7 @@
 # Sticks and stones
 ![](https://github.com/gabpa-gaming/sticksandstones/blob/master/gameGif1.gif)
 
-Top-down action rouglike game with procedural level generation, item and character upgrades, enemies and destructible terrain
+Top-down action rougelike game with procedural level generation, item and character upgrades, enemies and destructible terrain
 Fight enemies, gather items and interact with game world
 
 Game supports saving at the end of each level 

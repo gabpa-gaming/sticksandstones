@@ -24,11 +24,16 @@ auto initGameWindow() -> std::shared_ptr<sf::RenderWindow> {
         GAME_WIDTH_UNSCALED * Game::PIXEL_SCALE, GAME_HEIGHT_UNSCALED * Game::PIXEL_SCALE),
         "Sticks and stones");
 
-    sf::Image image;
-    assert(image.loadFromFile("res/ico.png"));
+    static sf::Image icon;
 
-    window->setIcon(16,16,image.getPixelsPtr());
+    if(!icon.loadFromFile("res/ico.png")) {
+        assert(false);
+    }
 
+    const sf::Uint8* pixelData = icon.getPixelsPtr();
+
+    window->setIcon(16, 16, pixelData);
+    fmt::print("Here");
     return window;
 }
 

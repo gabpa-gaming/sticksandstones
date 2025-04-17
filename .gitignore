@@ -1,2 +1,4 @@
 cmake-build-debug/*
 !*/res
+/cmake-build-release/
+/cmake-build-debug/
